@@ -13,7 +13,7 @@ export const baseEnvSchema = z.object({
 export type BaseEnv = z.infer<typeof baseEnvSchema>;
 
 export const loadEnv = <Schema extends z.ZodTypeAny>(schema: Schema): z.infer<Schema> => {
-  return schema.parse(process.env);
+  return schema.parse(process.env) as z.infer<Schema>;
 };
 
 export const baseEnv = (): BaseEnv => loadEnv(baseEnvSchema);

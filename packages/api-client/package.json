@@ -21,7 +21,7 @@
     "@queryflow/types": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.7.3",
+    "typescript": "^6.0.0",
     "vitest": "^3.0.2"
   }
 }

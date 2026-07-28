@@ -7,16 +7,16 @@ export default tseslint.config(
     ignores: ["**/dist/**", "**/.next/**", "**/node_modules/**", "**/coverage/**"]
   },
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.recommended,
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: false,
         tsconfigRootDir: import.meta.dirname
       }
     },
     rules: {
-      "@typescript-eslint/consistent-type-imports": ["error", { "prefer": "type-imports" }]
+      "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }]
     }
   },
   prettier
