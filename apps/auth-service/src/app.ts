@@ -15,7 +15,7 @@ app.use(cookieParser());
 app.get("/health", (_, res) => {
   res.status(200).json({
     success: true,
-    message: "Auth Service is running 🚀"
+    message: "Auth Service is running"
   });
 });
 
@@ -27,5 +27,5 @@ app.use(errorMiddleware);
 const PORT = process.env.AUTH_SERVICE_PORT || 4001;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Auth Service running on http://localhost:${PORT}`);
+  console.log(`Auth Service running on http://localhost:${PORT}`);
 });

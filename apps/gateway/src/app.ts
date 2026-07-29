@@ -1,28 +1,45 @@
-import cors from "cors";
 import express from "express";
+import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import swaggerUi from "swagger-ui-express";
-import { HealthController } from "./controllers/health.controller.js";
-import { errorHandler } from "./middleware/error-handler.js";
-import { requestLogger } from "./middleware/request-logger.js";
-import { createHealthRouter } from "./routes/health.routes.js";
-import { HealthService } from "./services/health.service.js";
-import { swaggerSpec } from "./utils/swagger.js";
+import morgan from "morgan";
+import authRoutes from "./routes/auth.routes.js";
+import { authenticate } from "./middleware/authenticate.js";
 
-export const createApp = (): express.Express => {
-  const app = express();
-  const healthService = new HealthService("gateway");
-  const healthController = new HealthController(healthService);
+const app = express();
 
-  app.use(helmet());
-  app.use(cors());
-  app.use(express.json());
-  app.use(requestLogger);
-  app.use(rateLimit({ windowMs: 60_000, limit: 120 }));
-  app.use(createHealthRouter(healthController));
-  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-  app.use(errorHandler);
+app.use(helmet());
 
-  return app;
-};
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true
+  })
+);
+
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+
+app.use("/api/auth", authRoutes);
+
+app.get("/api/profile", authenticate, (req, res) => {
+  res.json({
+    success: true,
+    user: req.user
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "API Gateway is running"
+  });
+});
+
+const PORT = process.env.GATEWAY_PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`API Gateway running on http://localhost:${PORT}`);
+});
+
+export default app;
