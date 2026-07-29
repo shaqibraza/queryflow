@@ -2,39 +2,33 @@ generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
 }
+
 datasource db {
   provider = "postgresql"
 }
 
 model User {
-  id              String   @id @default(cuid())
-  firstName       String
-  lastName        String
-  email           String   @unique
-  passwordHash    String
-
-  avatar          String?
-  emailVerified   Boolean  @default(false)
-
-  refreshTokens   RefreshToken[]
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String         @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String         @unique
+  passwordHash  String
+  avatar        String?
+  emailVerified Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  refreshTokens RefreshToken[]
 }
 
-
 model RefreshToken {
-  id          String   @id @default(cuid())
-  tokenHash   String
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-
-  userId      String
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  isRevoked Boolean @default(false)
-
-  device     String?
+  id        String   @id @default(cuid())
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userId    String
+  isRevoked Boolean  @default(false)
+  device    String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../utils/jwt.js";
-import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 declare global {
   namespace Express {
@@ -30,14 +30,14 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     req.user = payload;
     next();
   } catch (error) {
-    if (error instanceof TokenExpiredError) {
+    if (error instanceof jwt.TokenExpiredError) {
       return res.status(401).json({
         success: false,
         message: "Access token has expired"
       });
     }
 
-    if (error instanceof JsonWebTokenError) {
+    if (error instanceof jwt.JsonWebTokenError) {
       return res.status(401).json({
         success: false,
         message: "Invalid access token"

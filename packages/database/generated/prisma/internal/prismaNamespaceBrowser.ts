@@ -87,7 +87,9 @@ export const RefreshTokenScalarFieldEnum = {
   tokenHash: "tokenHash",
   expiresAt: "expiresAt",
   createdAt: "createdAt",
-  userId: "userId"
+  userId: "userId",
+  isRevoked: "isRevoked",
+  device: "device"
 } as const;
 
 export type RefreshTokenScalarFieldEnum =

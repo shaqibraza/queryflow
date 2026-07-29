@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "@queryflow/database";
 import { comparePassword, hashPassword } from "../utils/password.js";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwt.js";
-import { compareRefreshToken, hashRefreshToken } from "../utils/refresh-token.js";
-import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import { hashRefreshToken } from "../utils/refresh-token.js";
+import jwt from "jsonwebtoken";
 import { findMatchingRefreshToken } from "../utils/find-refresh-token.js";
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from "../utils/cookies.js";
 
@@ -31,7 +31,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         firstName,
         lastName,
         email,
-        password: passwordHash
+        passwordHash
       }
     });
 
@@ -285,7 +285,7 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
       }
     });
   } catch (error) {
-    if (error instanceof TokenExpiredError) {
+    if (error instanceof jwt.TokenExpiredError) {
       clearRefreshTokenCookie(res);
 
       return res.status(401).json({
@@ -294,7 +294,7 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
       });
     }
 
-    if (error instanceof JsonWebTokenError) {
+    if (error instanceof jwt.JsonWebTokenError) {
       clearRefreshTokenCookie(res);
 
       return res.status(401).json({
@@ -310,7 +310,6 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
 export const logout = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const refreshToken = req.cookies.refreshToken;
-
     if (!refreshToken) {
       return res.status(401).json({
         success: false,
@@ -355,7 +354,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
       message: "Logged out successfully"
     });
   } catch (error) {
-    if (error instanceof TokenExpiredError) {
+    if (error instanceof jwt.TokenExpiredError) {
       clearRefreshTokenCookie(res);
 
       return res.status(401).json({
@@ -364,7 +363,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
       });
     }
 
-    if (error instanceof JsonWebTokenError) {
+    if (error instanceof jwt.JsonWebTokenError) {
       clearRefreshTokenCookie(res);
 
       return res.status(401).json({
