@@ -3,7 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.routes.js";
-// import { errorMiddleware } from "./middleware/error.middleware";
+import { errorMiddleware } from "./middleware/error.middleware.js";
 
 const app = express();
 
@@ -22,7 +22,7 @@ app.get("/health", (_, res) => {
 app.use("/auth", authRoutes);
 
 // Global Error Handler
-// app.use(errorMiddleware);
+app.use(errorMiddleware);
 
 const PORT = process.env.AUTH_SERVICE_PORT || 4001;
 
