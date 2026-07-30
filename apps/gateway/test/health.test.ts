@@ -8,7 +8,7 @@ describe("GET /health", () => {
 
     expect(response.body).toMatchObject({
       success: true,
-      message: "API Gateway is running",
+      message: "API Gateway is running"
     });
   });
 });
