@@ -49,7 +49,8 @@ export const AnyNull = runtime.AnyNull;
 
 export const ModelName = {
   User: "User",
-  RefreshToken: "RefreshToken"
+  RefreshToken: "RefreshToken",
+  Dataset: "Dataset"
 } as const;
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -94,6 +95,23 @@ export const RefreshTokenScalarFieldEnum = {
 
 export type RefreshTokenScalarFieldEnum =
   (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum];
+
+export const DatasetScalarFieldEnum = {
+  id: "id",
+  name: "name",
+  description: "description",
+  ownerId: "ownerId",
+  fileName: "fileName",
+  fileType: "fileType",
+  fileSize: "fileSize",
+  storageKey: "storageKey",
+  status: "status",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt"
+} as const;
+
+export type DatasetScalarFieldEnum =
+  (typeof DatasetScalarFieldEnum)[keyof typeof DatasetScalarFieldEnum];
 
 export const SortOrder = {
   asc: "asc",

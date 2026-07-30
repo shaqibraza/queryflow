@@ -391,7 +391,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: "User",
-  RefreshToken: "RefreshToken"
+  RefreshToken: "RefreshToken",
+  Dataset: "Dataset"
 } as const;
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -411,7 +412,7 @@ export type TypeMap<
     omit: GlobalOmitOptions;
   };
   meta: {
-    modelProps: "user" | "refreshToken";
+    modelProps: "user" | "refreshToken" | "dataset";
     txIsolationLevel: TransactionIsolationLevel;
   };
   model: {
@@ -564,6 +565,80 @@ export type TypeMap<
         };
       };
     };
+    Dataset: {
+      payload: Prisma.$DatasetPayload<ExtArgs>;
+      fields: Prisma.DatasetFieldRefs;
+      operations: {
+        findUnique: {
+          args: Prisma.DatasetFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload> | null;
+        };
+        findUniqueOrThrow: {
+          args: Prisma.DatasetFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+        };
+        findFirst: {
+          args: Prisma.DatasetFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload> | null;
+        };
+        findFirstOrThrow: {
+          args: Prisma.DatasetFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+        };
+        findMany: {
+          args: Prisma.DatasetFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>[];
+        };
+        create: {
+          args: Prisma.DatasetCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+        };
+        createMany: {
+          args: Prisma.DatasetCreateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        createManyAndReturn: {
+          args: Prisma.DatasetCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>[];
+        };
+        delete: {
+          args: Prisma.DatasetDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+        };
+        update: {
+          args: Prisma.DatasetUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+        };
+        deleteMany: {
+          args: Prisma.DatasetDeleteManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateMany: {
+          args: Prisma.DatasetUpdateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateManyAndReturn: {
+          args: Prisma.DatasetUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>[];
+        };
+        upsert: {
+          args: Prisma.DatasetUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+        };
+        aggregate: {
+          args: Prisma.DatasetAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDataset>;
+        };
+        groupBy: {
+          args: Prisma.DatasetGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.DatasetGroupByOutputType>[];
+        };
+        count: {
+          args: Prisma.DatasetCountArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.DatasetCountAggregateOutputType> | number;
+        };
+      };
+    };
   };
 } & {
   other: {
@@ -630,6 +705,23 @@ export const RefreshTokenScalarFieldEnum = {
 export type RefreshTokenScalarFieldEnum =
   (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum];
 
+export const DatasetScalarFieldEnum = {
+  id: "id",
+  name: "name",
+  description: "description",
+  ownerId: "ownerId",
+  fileName: "fileName",
+  fileType: "fileType",
+  fileSize: "fileSize",
+  storageKey: "storageKey",
+  status: "status",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt"
+} as const;
+
+export type DatasetScalarFieldEnum =
+  (typeof DatasetScalarFieldEnum)[keyof typeof DatasetScalarFieldEnum];
+
 export const SortOrder = {
   asc: "asc",
   desc: "desc"
@@ -689,6 +781,32 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "Int[]">;
+
+/**
+ * Reference to a field of type 'DatasetStatus'
+ */
+export type EnumDatasetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  "DatasetStatus"
+>;
+
+/**
+ * Reference to a field of type 'DatasetStatus[]'
+ */
+export type ListEnumDatasetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  "DatasetStatus[]"
+>;
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "Float">;
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "Float[]">;
 
 /**
  * Batch Payload for updateMany & deleteMany & createMany
@@ -849,6 +967,7 @@ export type PrismaClientOptions =
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit;
   refreshToken?: Prisma.RefreshTokenOmit;
+  dataset?: Prisma.DatasetOmit;
 };
 
 /* Types for Logging */

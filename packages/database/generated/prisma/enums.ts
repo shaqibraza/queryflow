@@ -8,5 +8,11 @@
  * 🟢 You can import this file directly.
  */
 
-// This file is empty because there are no enums in the schema.
-export {};
+export const DatasetStatus = {
+  UPLOADED: "UPLOADED",
+  PROCESSING: "PROCESSING",
+  READY: "READY",
+  FAILED: "FAILED"
+} as const;
+
+export type DatasetStatus = (typeof DatasetStatus)[keyof typeof DatasetStatus];
