@@ -14,6 +14,10 @@ export const prisma =
   new PrismaClient({
     adapter
   });
+const x = prisma.dataset;
+console.log("User Delegate:", prisma.user);
+console.log("Refresh Delegate:", prisma.refreshToken);
+console.log("Dataset Delegate:", (prisma as any).dataset);
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
