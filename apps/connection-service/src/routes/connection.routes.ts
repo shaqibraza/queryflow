@@ -14,5 +14,7 @@ export function createConnectionRouter(controller: ConnectionController) {
 
   router.post("/:id/test", controller.testConnection);
 
+  router.get("/:id/tables", controller.getTables);
+
   return router;
 }

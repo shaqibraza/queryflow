@@ -1,13 +1,17 @@
 import { Client } from "pg";
 import { DatabaseConnector } from "../interfaces/database-connector.js";
 
-export class PostgresConnector implements DatabaseConnector {
+export class PostgresConnector implements DatabaseConnector<Client> {
   private client: Client;
 
-  constructor(connectionString: string) {
+  constructor(private readonly connectionString: string) {
     this.client = new Client({
-      connectionString
+      connectionString: this.connectionString
     });
+  }
+
+  async connect(): Promise<void> {
+    await this.client.connect();
   }
 
   async testConnection(): Promise<void> {
@@ -20,5 +24,9 @@ export class PostgresConnector implements DatabaseConnector {
 
   async disconnect(): Promise<void> {
     await this.client.end();
+  }
+
+  getClient(): Client {
+    return this.client;
   }
 }
