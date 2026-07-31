@@ -9,5 +9,5 @@
  */
 export type * from "./models/User.js";
 export type * from "./models/RefreshToken.js";
-export type * from "./models/Dataset.js";
+export type * from "./models/DatabaseConnection.js";
 export type * from "./commonInputTypes.js";

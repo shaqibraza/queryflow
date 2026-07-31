@@ -2,32 +2,36 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 
 import { HealthController } from "./controllers/health.controller.js";
-import { DatasetController } from "./controllers/dataset.controller.js";
+import { ConnectionController } from "./controllers/connection.controller.js";
 
 import { errorHandler } from "./middleware/error-handler.js";
 import { requestLogger } from "./middleware/request-logger.js";
 
 import { createHealthRouter } from "./routes/health.routes.js";
-import { createDatasetRouter } from "./routes/dataset.routes.js";
+import { createConnectionRouter } from "./routes/connection.routes.js";
 
 import { HealthService } from "./services/health.service.js";
-import { DatasetService } from "./services/dataset.service.js";
+import { ConnectionService } from "./services/connection.service.js";
 
-import { DatasetRepository } from "./repositories/dataset.repository.js";
+import { ConnectionRepository } from "./repositories/connection.repository.js";
 
 import { swaggerSpec } from "./utils/swagger.js";
 
 export const createApp = (): express.Express => {
   const app = express();
 
+  // Repositories
+  const connectionRepository = new ConnectionRepository();
+
   // Services
-  const healthService = new HealthService("dataset-service");
-  const datasetRepository = new DatasetRepository();
-  const datasetService = new DatasetService(datasetRepository);
+  const healthService = new HealthService("connection-service");
+
+  const connectionService = new ConnectionService(connectionRepository);
 
   // Controllers
   const healthController = new HealthController(healthService);
-  const datasetController = new DatasetController(datasetService);
+
+  const connectionController = new ConnectionController(connectionService);
 
   // Middlewares
   app.use(express.json());
@@ -35,12 +39,13 @@ export const createApp = (): express.Express => {
 
   // Routes
   app.use(createHealthRouter(healthController));
-  app.use(createDatasetRouter(datasetController));
+
+  app.use("/connections", createConnectionRouter(connectionController));
 
   // Swagger
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-  // Global Error Handler (Always Last)
+  // Global Error Handler
   app.use(errorHandler);
 
   return app;

@@ -8,11 +8,10 @@
  * 🟢 You can import this file directly.
  */
 
-export const DatasetStatus = {
-  UPLOADED: "UPLOADED",
-  PROCESSING: "PROCESSING",
-  READY: "READY",
-  FAILED: "FAILED"
+export const DatabaseType = {
+  POSTGRESQL: "POSTGRESQL",
+  MYSQL: "MYSQL",
+  MONGODB: "MONGODB"
 } as const;
 
-export type DatasetStatus = (typeof DatasetStatus)[keyof typeof DatasetStatus];
+export type DatabaseType = (typeof DatabaseType)[keyof typeof DatabaseType];

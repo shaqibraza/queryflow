@@ -392,7 +392,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: "User",
   RefreshToken: "RefreshToken",
-  Dataset: "Dataset"
+  DatabaseConnection: "DatabaseConnection"
 } as const;
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -412,7 +412,7 @@ export type TypeMap<
     omit: GlobalOmitOptions;
   };
   meta: {
-    modelProps: "user" | "refreshToken" | "dataset";
+    modelProps: "user" | "refreshToken" | "databaseConnection";
     txIsolationLevel: TransactionIsolationLevel;
   };
   model: {
@@ -565,77 +565,79 @@ export type TypeMap<
         };
       };
     };
-    Dataset: {
-      payload: Prisma.$DatasetPayload<ExtArgs>;
-      fields: Prisma.DatasetFieldRefs;
+    DatabaseConnection: {
+      payload: Prisma.$DatabaseConnectionPayload<ExtArgs>;
+      fields: Prisma.DatabaseConnectionFieldRefs;
       operations: {
         findUnique: {
-          args: Prisma.DatasetFindUniqueArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload> | null;
+          args: Prisma.DatabaseConnectionFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload> | null;
         };
         findUniqueOrThrow: {
-          args: Prisma.DatasetFindUniqueOrThrowArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+          args: Prisma.DatabaseConnectionFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload>;
         };
         findFirst: {
-          args: Prisma.DatasetFindFirstArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload> | null;
+          args: Prisma.DatabaseConnectionFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload> | null;
         };
         findFirstOrThrow: {
-          args: Prisma.DatasetFindFirstOrThrowArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+          args: Prisma.DatabaseConnectionFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload>;
         };
         findMany: {
-          args: Prisma.DatasetFindManyArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>[];
+          args: Prisma.DatabaseConnectionFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload>[];
         };
         create: {
-          args: Prisma.DatasetCreateArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+          args: Prisma.DatabaseConnectionCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload>;
         };
         createMany: {
-          args: Prisma.DatasetCreateManyArgs<ExtArgs>;
+          args: Prisma.DatabaseConnectionCreateManyArgs<ExtArgs>;
           result: BatchPayload;
         };
         createManyAndReturn: {
-          args: Prisma.DatasetCreateManyAndReturnArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>[];
+          args: Prisma.DatabaseConnectionCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload>[];
         };
         delete: {
-          args: Prisma.DatasetDeleteArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+          args: Prisma.DatabaseConnectionDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload>;
         };
         update: {
-          args: Prisma.DatasetUpdateArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+          args: Prisma.DatabaseConnectionUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload>;
         };
         deleteMany: {
-          args: Prisma.DatasetDeleteManyArgs<ExtArgs>;
+          args: Prisma.DatabaseConnectionDeleteManyArgs<ExtArgs>;
           result: BatchPayload;
         };
         updateMany: {
-          args: Prisma.DatasetUpdateManyArgs<ExtArgs>;
+          args: Prisma.DatabaseConnectionUpdateManyArgs<ExtArgs>;
           result: BatchPayload;
         };
         updateManyAndReturn: {
-          args: Prisma.DatasetUpdateManyAndReturnArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>[];
+          args: Prisma.DatabaseConnectionUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload>[];
         };
         upsert: {
-          args: Prisma.DatasetUpsertArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatasetPayload>;
+          args: Prisma.DatabaseConnectionUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DatabaseConnectionPayload>;
         };
         aggregate: {
-          args: Prisma.DatasetAggregateArgs<ExtArgs>;
-          result: runtime.Types.Utils.Optional<Prisma.AggregateDataset>;
+          args: Prisma.DatabaseConnectionAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDatabaseConnection>;
         };
         groupBy: {
-          args: Prisma.DatasetGroupByArgs<ExtArgs>;
-          result: runtime.Types.Utils.Optional<Prisma.DatasetGroupByOutputType>[];
+          args: Prisma.DatabaseConnectionGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.DatabaseConnectionGroupByOutputType>[];
         };
         count: {
-          args: Prisma.DatasetCountArgs<ExtArgs>;
-          result: runtime.Types.Utils.Optional<Prisma.DatasetCountAggregateOutputType> | number;
+          args: Prisma.DatabaseConnectionCountArgs<ExtArgs>;
+          result:
+            | runtime.Types.Utils.Optional<Prisma.DatabaseConnectionCountAggregateOutputType>
+            | number;
         };
       };
     };
@@ -705,22 +707,19 @@ export const RefreshTokenScalarFieldEnum = {
 export type RefreshTokenScalarFieldEnum =
   (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum];
 
-export const DatasetScalarFieldEnum = {
+export const DatabaseConnectionScalarFieldEnum = {
   id: "id",
   name: "name",
-  description: "description",
+  databaseType: "databaseType",
+  encryptedUrl: "encryptedUrl",
   ownerId: "ownerId",
-  fileName: "fileName",
-  fileType: "fileType",
-  fileSize: "fileSize",
-  storageKey: "storageKey",
-  status: "status",
+  isActive: "isActive",
   createdAt: "createdAt",
   updatedAt: "updatedAt"
 } as const;
 
-export type DatasetScalarFieldEnum =
-  (typeof DatasetScalarFieldEnum)[keyof typeof DatasetScalarFieldEnum];
+export type DatabaseConnectionScalarFieldEnum =
+  (typeof DatabaseConnectionScalarFieldEnum)[keyof typeof DatabaseConnectionScalarFieldEnum];
 
 export const SortOrder = {
   asc: "asc",
@@ -773,6 +772,22 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "DateTime[]">;
 
 /**
+ * Reference to a field of type 'DatabaseType'
+ */
+export type EnumDatabaseTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  "DatabaseType"
+>;
+
+/**
+ * Reference to a field of type 'DatabaseType[]'
+ */
+export type ListEnumDatabaseTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  "DatabaseType[]"
+>;
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "Int">;
@@ -781,32 +796,6 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "Int[]">;
-
-/**
- * Reference to a field of type 'DatasetStatus'
- */
-export type EnumDatasetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
-  $PrismaModel,
-  "DatasetStatus"
->;
-
-/**
- * Reference to a field of type 'DatasetStatus[]'
- */
-export type ListEnumDatasetStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
-  $PrismaModel,
-  "DatasetStatus[]"
->;
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "Float">;
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, "Float[]">;
 
 /**
  * Batch Payload for updateMany & deleteMany & createMany
@@ -967,7 +956,7 @@ export type PrismaClientOptions =
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit;
   refreshToken?: Prisma.RefreshTokenOmit;
-  dataset?: Prisma.DatasetOmit;
+  databaseConnection?: Prisma.DatabaseConnectionOmit;
 };
 
 /* Types for Logging */

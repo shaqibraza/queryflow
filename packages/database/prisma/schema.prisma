@@ -33,31 +33,27 @@ model RefreshToken {
   @@index([userId])
 }
 
-model Dataset {
-  id          String          @id @default(cuid())
 
-  name        String
-  description String?
-
-  ownerId     String
-
-  fileName    String
-  fileType    String
-  fileSize    Int
-
-  storageKey  String
-
-  status      DatasetStatus   @default(UPLOADED)
-
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-
-  @@index([ownerId])
+enum DatabaseType {
+  POSTGRESQL
+  MYSQL
+  MONGODB
 }
 
-enum DatasetStatus {
-  UPLOADED
-  PROCESSING
-  READY
-  FAILED
+model DatabaseConnection {
+  id            String        @id @default(cuid())
+
+  name          String
+  databaseType  DatabaseType
+
+  encryptedUrl  String
+
+  ownerId       String
+
+  isActive      Boolean       @default(true)
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([ownerId])
 }

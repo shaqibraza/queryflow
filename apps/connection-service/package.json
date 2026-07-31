@@ -1,5 +1,5 @@
 {
-  "name": "@queryflow/dataset-service",
+  "name": "@queryflow/connection-service",
   "version": "0.1.0",
   "private": true,
   "type": "module",

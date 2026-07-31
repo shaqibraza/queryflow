@@ -27,7 +27,7 @@ export type User = Prisma.UserModel;
  */
 export type RefreshToken = Prisma.RefreshTokenModel;
 /**
- * Model Dataset
+ * Model DatabaseConnection
  *
  */
-export type Dataset = Prisma.DatasetModel;
+export type DatabaseConnection = Prisma.DatabaseConnectionModel;
