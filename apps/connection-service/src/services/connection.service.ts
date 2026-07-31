@@ -1,6 +1,7 @@
 import { DatabaseType } from "@queryflow/database";
 import { ConnectionRepository } from "../repositories/connection.repository.js";
 import { decrypt, encrypt } from "../utils/encryption.js";
+import { ConnectorFactory } from "../factories/connector.factory.js";
 
 export class ConnectionService {
   constructor(private readonly connectionRepository: ConnectionRepository) {}
@@ -42,5 +43,24 @@ export class ConnectionService {
 
   decryptConnectionUrl(encryptedUrl: string) {
     return decrypt(encryptedUrl);
+  }
+
+  async testConnection(connectionId: string, ownerId: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connectionString = decrypt(connection.encryptedUrl);
+
+    const connector = ConnectorFactory.create(connection.databaseType, connectionString);
+
+    await connector.testConnection();
+
+    return {
+      success: true,
+      message: "Database connection established successfully."
+    };
   }
 }

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ConnectionService } from "../services/connection.service.js";
 import { createConnectionSchema } from "../validators/connection.validator.js";
+import { success } from "zod/v4";
 
 export class ConnectionController {
   constructor(private readonly connectionService: ConnectionService) {}
@@ -112,6 +113,32 @@ export class ConnectionController {
         success: true,
         message: "Connection deleted successfully"
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  testConnection = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const ownerId = req.header("x-user-id");
+      if (typeof ownerId !== "string") {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized"
+        });
+      }
+
+      const { id } = req.params;
+      if (typeof id !== "string") {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid connection ID"
+        });
+      }
+
+      const result = await this.connectionService.testConnection(id, ownerId);
+
+      return res.status(200).json(result);
     } catch (error) {
       next(error);
     }

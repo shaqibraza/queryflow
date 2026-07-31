@@ -12,5 +12,7 @@ export function createConnectionRouter(controller: ConnectionController) {
 
   router.delete("/:id", controller.deleteConnection);
 
+  router.post("/:id/test", controller.testConnection);
+
   return router;
 }
