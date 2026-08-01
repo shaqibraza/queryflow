@@ -77,7 +77,6 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       }
     });
   } catch (error: any) {
-    console.log(error);
     next(error);
   }
 };
@@ -154,7 +153,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       }
     });
   } catch (error: any) {
-    console.log(error);
     next(error);
   }
 };
@@ -413,7 +411,6 @@ export const me = async (req: Request, res: Response, next: NextFunction) => {
       data: user
     });
   } catch (error: any) {
-    console.log(error);
     next(error);
   }
 };

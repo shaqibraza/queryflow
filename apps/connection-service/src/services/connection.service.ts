@@ -32,6 +32,28 @@ export class ConnectionService {
     return this.connectionRepository.findByIdAndOwner(id, ownerId);
   }
 
+  async updateConnection(
+    id: string,
+    ownerId: string,
+    data: {
+      name?: string;
+      databaseType?: DatabaseType;
+      databaseUrl?: string;
+    }
+  ) {
+    const connection = await this.connectionRepository.findByIdAndOwner(id, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    return this.connectionRepository.update(connection.id, {
+      name: data.name,
+      databaseType: data.databaseType,
+      encryptedUrl: data.databaseUrl ? encrypt(data.databaseUrl) : undefined
+    });
+  }
+
   async deleteConnection(id: string, ownerId: string) {
     const connection = await this.connectionRepository.findByIdAndOwner(id, ownerId);
 
@@ -106,6 +128,160 @@ export class ConnectionService {
     try {
       const tableReader = TableReaderFactory.create(connection.databaseType, connector.getClient());
       return await tableReader.getColumns(tableName);
+    } finally {
+      await connector.disconnect();
+    }
+  }
+
+  async getPrimaryKeys(connectionId: string, ownerId: string, tableName: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connector = ConnectorFactory.create(
+      connection.databaseType,
+      decrypt(connection.encryptedUrl)
+    );
+
+    await connector.connect();
+
+    try {
+      const tableReader = TableReaderFactory.create(connection.databaseType, connector.getClient());
+      return await tableReader.getPrimaryKeys(tableName);
+    } finally {
+      await connector.disconnect();
+    }
+  }
+
+  async getRelations(connectionId: string, ownerId: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connector = ConnectorFactory.create(
+      connection.databaseType,
+      decrypt(connection.encryptedUrl)
+    );
+
+    await connector.connect();
+
+    try {
+      const tableReader = TableReaderFactory.create(connection.databaseType, connector.getClient());
+      return await tableReader.getRelations();
+    } finally {
+      await connector.disconnect();
+    }
+  }
+
+  async getIndexes(connectionId: string, ownerId: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connector = ConnectorFactory.create(
+      connection.databaseType,
+      decrypt(connection.encryptedUrl)
+    );
+
+    await connector.connect();
+
+    try {
+      const tableReader = TableReaderFactory.create(connection.databaseType, connector.getClient());
+      return await tableReader.getIndexes();
+    } finally {
+      await connector.disconnect();
+    }
+  }
+
+  async getViews(connectionId: string, ownerId: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connector = ConnectorFactory.create(
+      connection.databaseType,
+      decrypt(connection.encryptedUrl)
+    );
+
+    await connector.connect();
+
+    try {
+      const tableReader = TableReaderFactory.create(connection.databaseType, connector.getClient());
+      return await tableReader.getViews();
+    } finally {
+      await connector.disconnect();
+    }
+  }
+
+  async getFunctions(connectionId: string, ownerId: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connector = ConnectorFactory.create(
+      connection.databaseType,
+      decrypt(connection.encryptedUrl)
+    );
+
+    await connector.connect();
+
+    try {
+      const tableReader = TableReaderFactory.create(connection.databaseType, connector.getClient());
+      return await tableReader.getFunctions();
+    } finally {
+      await connector.disconnect();
+    }
+  }
+
+  async getDatabaseInfo(connectionId: string, ownerId: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connector = ConnectorFactory.create(
+      connection.databaseType,
+      decrypt(connection.encryptedUrl)
+    );
+
+    await connector.connect();
+
+    try {
+      const tableReader = TableReaderFactory.create(connection.databaseType, connector.getClient());
+      return await tableReader.getDatabaseInfo();
+    } finally {
+      await connector.disconnect();
+    }
+  }
+
+  async getSchemas(connectionId: string, ownerId: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connector = ConnectorFactory.create(
+      connection.databaseType,
+      decrypt(connection.encryptedUrl)
+    );
+
+    await connector.connect();
+
+    try {
+      const tableReader = TableReaderFactory.create(connection.databaseType, connector.getClient());
+      return await tableReader.getSchemas();
     } finally {
       await connector.disconnect();
     }

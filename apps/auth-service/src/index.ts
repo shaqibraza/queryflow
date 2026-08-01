@@ -6,5 +6,10 @@ dotenv.config({
   path: path.resolve(process.cwd(), "../../.env")
 });
 
-// Import the actual app only after env is loaded
-await import("./app.js");
+const { createApp } = await import("./app.js");
+const app = createApp();
+const port = process.env.AUTH_SERVICE_PORT || 4001;
+
+app.listen(port, () => {
+  console.log(`Auth Service running on http://localhost:${port}`);
+});

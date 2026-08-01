@@ -7,8 +7,8 @@ describe("GET /health", () => {
     const response = await request(createApp()).get("/health").expect(200);
 
     expect(response.body).toMatchObject({
-      service: "auth-service",
-      status: "ok"
+      success: true,
+      message: "Auth Service is running"
     });
   });
 });

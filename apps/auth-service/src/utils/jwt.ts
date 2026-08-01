@@ -1,24 +1,32 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
-
 type JwtPayload = {
   userId: string;
   email: string;
 };
 
+const getJwtSecret = (): string => {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new Error("JWT_SECRET must be configured");
+  }
+
+  return secret;
+};
+
 export const generateAccessToken = (payload: JwtPayload) => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "15m" });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "15m" });
 };
 
 export const generateRefreshToken = (payload: JwtPayload) => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "30d" });
 };
 
 export const verifyAccessToken = (token: string) => {
-  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+  return jwt.verify(token, getJwtSecret()) as JwtPayload;
 };
 
 export const verifyRefreshToken = (token: string) => {
-  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+  return jwt.verify(token, getJwtSecret()) as JwtPayload;
 };

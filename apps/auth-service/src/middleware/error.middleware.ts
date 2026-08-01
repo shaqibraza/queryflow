@@ -7,8 +7,6 @@ export const errorMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(error);
-
   if (error instanceof ZodError) {
     return res.status(400).json({
       success: false,
@@ -23,7 +21,7 @@ export const errorMiddleware = (
   if (error instanceof Error) {
     return res.status(500).json({
       success: false,
-      message: error.message
+      message: "Internal server error"
     });
   }
 

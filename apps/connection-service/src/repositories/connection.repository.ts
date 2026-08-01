@@ -43,4 +43,16 @@ export class ConnectionRepository {
       }
     });
   }
+
+  async update(
+    id: string,
+    data: Prisma.DatabaseConnectionUpdateInput
+  ): Promise<DatabaseConnection> {
+    return prisma.databaseConnection.update({
+      where: {
+        id
+      },
+      data
+    });
+  }
 }
