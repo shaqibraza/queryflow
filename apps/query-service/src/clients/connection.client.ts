@@ -17,7 +17,8 @@ export class ConnectionClient {
         "X-User-Id": userId
       }
     });
-    return response.data;
+
+    return response.data.data;
   }
 
   async getTables(connectionId: string, userId: string) {

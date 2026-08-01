@@ -2,6 +2,7 @@ import { MetadataService } from "./metadata.service.js";
 import { PromptBuilderFactory } from "../ai/factories/prompt-builder.factory.js";
 import { GeminiClient } from "../ai/clients/gemini.client.js";
 import { MetadataSanitizer } from "../metadata/sanitizer/metadata-sanitizer.js";
+import { AnalyzerFactory } from "../query-analyzer/analyzer.factory.js";
 
 export class QueryService {
   constructor(
@@ -19,7 +20,7 @@ export class QueryService {
     );
 
     // Select prompt builder
-    const promptBuilder = PromptBuilderFactory.create(connection.data.databaseType);
+    const promptBuilder = PromptBuilderFactory.create(connection.databaseType);
 
     // Build prompt
     const prompt = promptBuilder.build({
@@ -29,8 +30,13 @@ export class QueryService {
 
     const sql = await this.geminiClient.generate(prompt);
 
+    const analyzer = AnalyzerFactory.create(connection.databaseType);
+
+    const analysis = analyzer.analyze(sql);
+
     return {
-      sql
+      sql,
+      analysis
     };
   }
 }
