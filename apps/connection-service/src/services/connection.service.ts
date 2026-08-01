@@ -286,4 +286,25 @@ export class ConnectionService {
       await connector.disconnect();
     }
   }
+
+  async executeQuery(connectionId: string, ownerId: string, query: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connector = ConnectorFactory.create(
+      connection.databaseType,
+      decrypt(connection.encryptedUrl)
+    );
+
+    await connector.connect();
+
+    try {
+      return await connector.executeQuery(query);
+    } finally {
+      await connector.disconnect();
+    }
+  }
 }

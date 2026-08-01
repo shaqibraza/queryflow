@@ -111,4 +111,20 @@ export class ConnectionClient {
 
     return response.data;
   }
+
+  async executeQuery(connectionId: string, query: string, userId: string) {
+    const response = await this.client.post(
+      `connections/${connectionId}/execute`,
+      {
+        query
+      },
+      {
+        headers: {
+          "X-User-Id": userId
+        }
+      }
+    );
+
+    return response.data.data;
+  }
 }

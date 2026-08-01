@@ -395,4 +395,32 @@ export class ConnectionController {
       next(error);
     }
   };
+
+  executeQuery = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.header("x-user-id");
+      if (typeof userId !== "string") {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      if (typeof id !== "string") {
+        return res.status(400).json({ success: false, message: "Invalid connection ID" });
+      }
+
+      const { query } = req.body;
+      if (typeof query !== "string" || !query.trim()) {
+        return res.status(400).json({ success: false, message: "Invalid query" });
+      }
+
+      const result = await this.connectionService.executeQuery(id, userId, query);
+
+      return res.status(200).json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -15,11 +15,13 @@ export class PostgresConnector implements DatabaseConnector<Client> {
   }
 
   async testConnection(): Promise<void> {
-    await this.client.connect();
+    await this.connect();
 
-    await this.client.query("SELECT 1");
-
-    await this.client.end();
+    try {
+      await this.client.query("SELECT 1");
+    } finally {
+      await this.disconnect();
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -28,5 +30,19 @@ export class PostgresConnector implements DatabaseConnector<Client> {
 
   getClient(): Client {
     return this.client;
+  }
+
+  async executeQuery(query: string) {
+    const result = await this.client.query(query);
+
+    return {
+      rows: result.rows,
+      rowCount: result.rowCount ?? 0,
+      command: result.command,
+      fields: result.fields.map((field) => ({
+        name: field.name,
+        dataTypeId: field.dataTypeID
+      }))
+    };
   }
 }

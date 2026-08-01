@@ -16,7 +16,7 @@ const metadataService = new MetadataService(connectionClient);
 
 const geminiClient = new GeminiClient();
 
-const queryService = new QueryService(metadataService, geminiClient);
+const queryService = new QueryService(metadataService, geminiClient, connectionClient);
 
 const queryController = new QueryController(queryService);
 

@@ -4,4 +4,6 @@ export interface DatabaseConnector<TClient = unknown> {
 
   disconnect(): Promise<void>;
   getClient(): TClient;
+
+  executeQuery(query: string): Promise<unknown>;
 }

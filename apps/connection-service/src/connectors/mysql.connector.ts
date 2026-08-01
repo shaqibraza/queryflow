@@ -34,4 +34,17 @@ export class MysqlConnector implements DatabaseConnector<mysql.Connection> {
 
     return this.connection;
   }
+
+  async executeQuery(query: string) {
+    if (!this.connection) {
+      throw new Error("MySQL client is not connected");
+    }
+
+    const [rows, fields] = await this.connection.query(query);
+
+    return {
+      rows,
+      fields
+    };
+  }
 }

@@ -34,5 +34,7 @@ export function createConnectionRouter(controller: ConnectionController) {
 
   router.get("/:id/schemas", controller.getSchemas);
 
+  router.post("/:id/execute", controller.executeQuery);
+
   return router;
 }
