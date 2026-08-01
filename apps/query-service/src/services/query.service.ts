@@ -5,6 +5,8 @@ import { MetadataSanitizer } from "../metadata/sanitizer/metadata-sanitizer.js";
 import { AnalyzerFactory } from "../query-analyzer/analyzer.factory.js";
 import { ExecutorFactory } from "../executors/executor.factory.js";
 import { ConnectionClient } from "../clients/connection.client.js";
+import { DatabaseType } from "@queryflow/database";
+import { MongoCommandParser } from "../parser/mongo-command.parser.js";
 
 export class QueryService {
   constructor(
@@ -31,16 +33,22 @@ export class QueryService {
       metadata
     });
 
-    const sql = await this.geminiClient.generate(prompt);
+    const response = await this.geminiClient.generate(prompt);
+
+    let query: unknown = response;
+
+    if (connection.databaseType === DatabaseType.MONGODB) {
+      query = MongoCommandParser.parse(response);
+    }
 
     const analyzer = AnalyzerFactory.create(connection.databaseType);
 
-    const analysis = analyzer.analyze(sql);
+    const analysis = analyzer.analyze(query as never);
 
     // WRITE / DDL
     if (analysis.requiresConfirmation) {
       return {
-        sql,
+        query,
         analysis
       };
     }
@@ -53,10 +61,10 @@ export class QueryService {
       userId
     );
 
-    const result = await executor.execute(sql);
+    const result = await executor.execute(query as never);
 
     return {
-      sql,
+      query,
       analysis,
       result
     };

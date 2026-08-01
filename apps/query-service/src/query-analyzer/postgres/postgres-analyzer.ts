@@ -9,7 +9,7 @@ const DDL_KEYWORDS = ["CREATE", "ALTER", "DROP", "TRUNCATE", "REINDEX"];
 
 const TRANSACTION_KEYWORDS = ["BEGIN", "COMMIT", "ROLLBACK", "SAVEPOINT"];
 
-export class PostgresAnalyzer implements Analyzer {
+export class PostgresAnalyzer implements Analyzer<string> {
   analyze(query: string): QueryAnalysis {
     const sql = query.trim();
 

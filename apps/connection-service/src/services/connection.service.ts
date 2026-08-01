@@ -3,6 +3,7 @@ import { ConnectionRepository } from "../repositories/connection.repository.js";
 import { decrypt, encrypt } from "../utils/encryption.js";
 import { ConnectorFactory } from "../factories/connector.factory.js";
 import { TableReaderFactory } from "../schema/factories/table-reader.factory.js";
+import { MongoCommand } from "@queryflow/shared";
 
 export class ConnectionService {
   constructor(private readonly connectionRepository: ConnectionRepository) {}
@@ -287,7 +288,7 @@ export class ConnectionService {
     }
   }
 
-  async executeQuery(connectionId: string, ownerId: string, query: string) {
+  async executeQuery(connectionId: string, ownerId: string, query: string | MongoCommand) {
     const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
 
     if (!connection) {
@@ -302,7 +303,7 @@ export class ConnectionService {
     await connector.connect();
 
     try {
-      return await connector.executeQuery(query);
+      return await connector.executeQuery(query as never);
     } finally {
       await connector.disconnect();
     }

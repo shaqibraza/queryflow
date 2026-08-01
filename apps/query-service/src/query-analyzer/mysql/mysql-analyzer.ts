@@ -9,7 +9,7 @@ const DDL_KEYWORDS = ["CREATE", "ALTER", "DROP", "TRUNCATE", "RENAME"];
 
 const TRANSACTION_KEYWORDS = ["START", "BEGIN", "COMMIT", "ROLLBACK", "SAVEPOINT"];
 
-export class MysqlAnalyzer implements Analyzer {
+export class MysqlAnalyzer implements Analyzer<string> {
   analyze(query: string): QueryAnalysis {
     const sql = query.trim();
 

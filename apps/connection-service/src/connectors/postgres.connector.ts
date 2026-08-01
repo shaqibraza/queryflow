@@ -1,7 +1,7 @@
 import { Client } from "pg";
 import { DatabaseConnector } from "../interfaces/database-connector.js";
 
-export class PostgresConnector implements DatabaseConnector<Client> {
+export class PostgresConnector implements DatabaseConnector<Client, string> {
   private client: Client;
 
   constructor(private readonly connectionString: string) {

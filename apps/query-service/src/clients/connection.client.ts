@@ -112,9 +112,9 @@ export class ConnectionClient {
     return response.data;
   }
 
-  async executeQuery(connectionId: string, query: string, userId: string) {
+  async executeQuery(connectionId: string, query: unknown, userId: string) {
     const response = await this.client.post(
-      `connections/${connectionId}/execute`,
+      `/connections/${connectionId}/execute`,
       {
         query
       },

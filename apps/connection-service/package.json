@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@queryflow/database": "workspace:*",
+    "@queryflow/shared": "workspace:*",
     "@queryflow/types": "workspace:*",
     "@queryflow/utils": "workspace:*",
     "csv-parse": "^5.6.0",

@@ -13,6 +13,7 @@
   "dependencies": {
     "@google/genai": "^0.7.0",
     "@queryflow/database": "workspace:*",
+    "@queryflow/shared": "workspace:*",
     "@queryflow/types": "workspace:*",
     "@queryflow/utils": "workspace:*",
     "axios": "^1.19.0",

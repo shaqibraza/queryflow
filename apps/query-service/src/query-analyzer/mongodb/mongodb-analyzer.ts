@@ -1,9 +1,10 @@
 import { Analyzer } from "../interfaces/analyzer.js";
 import { QueryAnalysis } from "../types/query-analysis.js";
+import { MongoCommand } from "@queryflow/shared";
 
-export class MongoDbAnalyzer implements Analyzer {
-  analyze(query: string): QueryAnalysis {
-    const normalized = query.trim().toLowerCase();
+export class MongoDbAnalyzer implements Analyzer<MongoCommand> {
+  analyze(query: MongoCommand): QueryAnalysis {
+    const normalized = JSON.stringify(query).trim().toLowerCase();
 
     if (!normalized) {
       return {

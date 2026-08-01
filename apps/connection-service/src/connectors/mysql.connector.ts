@@ -1,7 +1,7 @@
 import mysql from "mysql2/promise";
 import { DatabaseConnector } from "../interfaces/database-connector.js";
 
-export class MysqlConnector implements DatabaseConnector<mysql.Connection> {
+export class MysqlConnector implements DatabaseConnector<mysql.Connection, string> {
   private connection?: mysql.Connection;
 
   constructor(private readonly connectionString: string) {}

@@ -1,9 +1,9 @@
-export interface DatabaseConnector<TClient = unknown> {
+export interface DatabaseConnector<TClient = unknown, TQuery = string> {
   connect(): Promise<void>;
   testConnection(): Promise<void>;
 
   disconnect(): Promise<void>;
   getClient(): TClient;
 
-  executeQuery(query: string): Promise<unknown>;
+  executeQuery(query: TQuery): Promise<unknown>;
 }
