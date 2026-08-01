@@ -8,6 +8,7 @@ import { HealthService } from "./services/health.service.js";
 import { swaggerSpec } from "./utils/swagger.js";
 
 import metadataRoutes from "./routes/metadata.routes.js";
+import queryRoutes from "./routes/query.routes.js";
 
 export const createApp = (): express.Express => {
   const app = express();
@@ -21,6 +22,7 @@ export const createApp = (): express.Express => {
   app.use(errorHandler);
 
   app.use("/metadata", metadataRoutes);
+  app.use("/query", queryRoutes);
 
   return app;
 };
