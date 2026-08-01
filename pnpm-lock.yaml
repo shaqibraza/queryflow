@@ -437,6 +437,9 @@ importers:
 
   apps/query-service:
     dependencies:
+      '@google/genai':
+        specifier: ^0.7.0
+        version: 0.7.0
       '@queryflow/database':
         specifier: workspace:*
         version: link:../../packages/database

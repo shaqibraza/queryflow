@@ -6,6 +6,7 @@ import { MetadataService } from "../services/metadata.service.js";
 import { QueryService } from "../services/query.service.js";
 
 import { QueryController } from "../controllers/query.controller.js";
+import { GeminiClient } from "../ai/clients/gemini.client.js";
 
 const router = Router();
 
@@ -13,7 +14,9 @@ const connectionClient = new ConnectionClient();
 
 const metadataService = new MetadataService(connectionClient);
 
-const queryService = new QueryService(metadataService);
+const geminiClient = new GeminiClient();
+
+const queryService = new QueryService(metadataService, geminiClient);
 
 const queryController = new QueryController(queryService);
 
