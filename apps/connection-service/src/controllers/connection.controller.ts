@@ -171,4 +171,30 @@ export class ConnectionController {
       next(error);
     }
   };
+
+  getColumns = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const ownerId = req.header("x-user-id");
+      const { id, table } = req.params;
+
+      if (typeof ownerId !== "string") {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      }
+
+      if (typeof id !== "string" || typeof table !== "string" || !table.trim()) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid connection or table name" });
+      }
+
+      const columns = await this.connectionService.getColumns(id, ownerId, table);
+
+      return res.status(200).json({
+        success: true,
+        data: columns
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

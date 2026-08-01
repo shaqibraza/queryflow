@@ -88,4 +88,26 @@ export class ConnectionService {
       await connector.disconnect();
     }
   }
+
+  async getColumns(connectionId: string, ownerId: string, tableName: string) {
+    const connection = await this.connectionRepository.findByIdAndOwner(connectionId, ownerId);
+
+    if (!connection) {
+      throw new Error("Connection not found");
+    }
+
+    const connector = ConnectorFactory.create(
+      connection.databaseType,
+      decrypt(connection.encryptedUrl)
+    );
+
+    await connector.connect();
+
+    try {
+      const tableReader = TableReaderFactory.create(connection.databaseType, connector.getClient());
+      return await tableReader.getColumns(tableName);
+    } finally {
+      await connector.disconnect();
+    }
+  }
 }

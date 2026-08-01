@@ -1,18 +1,23 @@
 import mysql from "mysql2/promise";
 import { DatabaseConnector } from "../interfaces/database-connector.js";
 
-export class MysqlConnector implements DatabaseConnector {
+export class MysqlConnector implements DatabaseConnector<mysql.Connection> {
   private connection?: mysql.Connection;
 
   constructor(private readonly connectionString: string) {}
 
-  async testConnection(): Promise<void> {
+  async connect(): Promise<void> {
     this.connection = await mysql.createConnection(this.connectionString);
+  }
 
-    await this.connection.query("SELECT 1");
+  async testConnection(): Promise<void> {
+    await this.connect();
 
-    await this.connection.end();
-    this.connection = undefined;
+    try {
+      await this.connection!.query("SELECT 1");
+    } finally {
+      await this.disconnect();
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -20,5 +25,13 @@ export class MysqlConnector implements DatabaseConnector {
       await this.connection.end();
       this.connection = undefined;
     }
+  }
+
+  getClient(): mysql.Connection {
+    if (!this.connection) {
+      throw new Error("MySQL client is not connected");
+    }
+
+    return this.connection;
   }
 }
