@@ -67,4 +67,47 @@ export class ConnectionClient {
     });
     return response.data;
   }
+
+  async getPrimaryKeys(connectionId: string, tableName: string, userId: string) {
+    const response = await this.client.get(
+      `/connections/${connectionId}/tables/${encodeURIComponent(tableName)}/primary-key`,
+      {
+        headers: {
+          "X-User-Id": userId
+        }
+      }
+    );
+
+    return response.data;
+  }
+
+  async getIndexes(connectionId: string, userId: string) {
+    const response = await this.client.get(`/connections/${connectionId}/indexes`, {
+      headers: {
+        "X-User-Id": userId
+      }
+    });
+
+    return response.data;
+  }
+
+  async getViews(connectionId: string, userId: string) {
+    const response = await this.client.get(`/connections/${connectionId}/views`, {
+      headers: {
+        "X-User-Id": userId
+      }
+    });
+
+    return response.data;
+  }
+
+  async getFunctions(connectionId: string, userId: string) {
+    const response = await this.client.get(`/connections/${connectionId}/functions`, {
+      headers: {
+        "X-User-Id": userId
+      }
+    });
+
+    return response.data;
+  }
 }

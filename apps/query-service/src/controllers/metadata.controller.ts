@@ -24,10 +24,7 @@ export class MetadataController {
 
       const result = await this.metadataService.getTables(connectionId, userId);
 
-      return res.status(200).json({
-        success: true,
-        data: result
-      });
+      return res.status(200).json(result);
     } catch (error) {
       next(error);
     }
@@ -61,10 +58,7 @@ export class MetadataController {
 
       const result = await this.metadataService.getColumns(connectionId, tableName, userId);
 
-      return res.status(200).json({
-        success: true,
-        data: result
-      });
+      return res.status(200).json(result);
     } catch (error) {
       next(error);
     }
@@ -90,10 +84,7 @@ export class MetadataController {
 
       const result = await this.metadataService.getRelations(connectionId, userId);
 
-      return res.status(200).json({
-        success: true,
-        data: result
-      });
+      return res.status(200).json(result);
     } catch (error) {
       next(error);
     }
@@ -119,10 +110,7 @@ export class MetadataController {
 
       const result = await this.metadataService.getDatabaseInfo(connectionId, userId);
 
-      return res.status(200).json({
-        success: true,
-        data: result
-      });
+      return res.status(200).json(result);
     } catch (error) {
       next(error);
     }
@@ -148,10 +136,7 @@ export class MetadataController {
 
       const result = await this.metadataService.getSchemas(connectionId, userId);
 
-      return res.status(200).json({
-        success: true,
-        data: result
-      });
+      return res.status(200).json(result);
     } catch (error) {
       next(error);
     }

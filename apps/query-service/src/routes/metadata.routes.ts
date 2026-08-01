@@ -12,7 +12,7 @@ const metadataController = new MetadataController(metadataService);
 
 router.get("/:connectionId/tables", metadataController.getTables);
 
-router.get("/:connectionId/tables/:table/columns", metadataController.getColumns);
+router.get("/:connectionId/tables/:tableName/columns", metadataController.getColumns);
 
 router.get("/:connectionId/relations", metadataController.getRelations);
 
