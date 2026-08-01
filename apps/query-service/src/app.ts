@@ -7,6 +7,8 @@ import { createHealthRouter } from "./routes/health.routes.js";
 import { HealthService } from "./services/health.service.js";
 import { swaggerSpec } from "./utils/swagger.js";
 
+import metadataRoutes from "./routes/metadata.routes.js";
+
 export const createApp = (): express.Express => {
   const app = express();
   const healthService = new HealthService("query-service");
@@ -17,6 +19,8 @@ export const createApp = (): express.Express => {
   app.use(createHealthRouter(healthController));
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   app.use(errorHandler);
+
+  app.use("/metadata", metadataRoutes);
 
   return app;
 };
