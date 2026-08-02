@@ -126,10 +126,6 @@ export class ConnectionClient {
 
       return response.data.data;
     } catch (error: any) {
-      console.error("MESSAGE:", error.message);
-      console.error("CODE:", error.code);
-      console.error("DETAIL:", error.detail);
-      console.error("CONSTRAINT:", error.constraint);
       throw error;
     }
   }

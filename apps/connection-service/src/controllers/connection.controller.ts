@@ -409,9 +409,6 @@ export class ConnectionController {
       }
 
       const query = req.body.query;
-      console.log("BODY:", req.body);
-      console.log("QUERY:", query);
-      console.log("TYPE:", typeof query);
 
       const isValid =
         (typeof query === "string" && query.trim().length > 0) ||
