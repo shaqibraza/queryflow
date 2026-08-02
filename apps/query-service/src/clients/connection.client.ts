@@ -113,18 +113,24 @@ export class ConnectionClient {
   }
 
   async executeQuery(connectionId: string, query: unknown, userId: string) {
-    const response = await this.client.post(
-      `/connections/${connectionId}/execute`,
-      {
-        query
-      },
-      {
-        headers: {
-          "X-User-Id": userId
+    try {
+      const response = await this.client.post(
+        `/connections/${connectionId}/execute`,
+        { query },
+        {
+          headers: {
+            "X-User-Id": userId
+          }
         }
-      }
-    );
+      );
 
-    return response.data.data;
+      return response.data.data;
+    } catch (error: any) {
+      console.error("MESSAGE:", error.message);
+      console.error("CODE:", error.code);
+      console.error("DETAIL:", error.detail);
+      console.error("CONSTRAINT:", error.constraint);
+      throw error;
+    }
   }
 }

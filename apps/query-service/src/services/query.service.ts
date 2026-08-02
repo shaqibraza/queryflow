@@ -39,6 +39,18 @@ export class QueryService {
 
     const query = parser.parse(response);
 
+    if (query === "CANNOT_GENERATE_QUERY") {
+      return {
+        generatedQuery: null,
+        analysis: {
+          type: "INVALID",
+          requiresConfirmation: false,
+          firstKeyword: "CANNOT_GENERATE_QUERY"
+        },
+        message: "Unable to generate a valid query from the available metadata."
+      };
+    }
+
     const analyzer = AnalyzerFactory.create(connection.databaseType);
 
     const analysis = analyzer.analyze(query as never);

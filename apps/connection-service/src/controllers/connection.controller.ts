@@ -408,9 +408,20 @@ export class ConnectionController {
         return res.status(400).json({ success: false, message: "Invalid connection ID" });
       }
 
-      const { query } = req.body;
-      if (typeof query !== "string" || !query.trim()) {
-        return res.status(400).json({ success: false, message: "Invalid query" });
+      const query = req.body.query;
+      console.log("BODY:", req.body);
+      console.log("QUERY:", query);
+      console.log("TYPE:", typeof query);
+
+      const isValid =
+        (typeof query === "string" && query.trim().length > 0) ||
+        (typeof query === "object" && query !== null);
+
+      if (!isValid) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid query"
+        });
       }
 
       const result = await this.connectionService.executeQuery(id, userId, query);
