@@ -5,8 +5,7 @@ import { MetadataSanitizer } from "../metadata/sanitizer/metadata-sanitizer.js";
 import { AnalyzerFactory } from "../query-analyzer/analyzer.factory.js";
 import { ExecutorFactory } from "../executors/executor.factory.js";
 import { ConnectionClient } from "../clients/connection.client.js";
-import { DatabaseType } from "@queryflow/database";
-import { MongoCommandParser } from "../parser/mongo-command.parser.js";
+import { ResponseParserFactory } from "../parser/response-parser.factory.js";
 
 export class QueryService {
   constructor(
@@ -35,11 +34,9 @@ export class QueryService {
 
     const response = await this.geminiClient.generate(prompt);
 
-    let query: unknown = response;
+    const parser = ResponseParserFactory.create(connection.databaseType);
 
-    if (connection.databaseType === DatabaseType.MONGODB) {
-      query = MongoCommandParser.parse(response);
-    }
+    const query = parser.parse(response);
 
     const analyzer = AnalyzerFactory.create(connection.databaseType);
 
