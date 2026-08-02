@@ -6,6 +6,7 @@ import { AnalyzerFactory } from "../query-analyzer/analyzer.factory.js";
 import { ExecutorFactory } from "../executors/executor.factory.js";
 import { ConnectionClient } from "../clients/connection.client.js";
 import { ResponseParserFactory } from "../parser/response-parser.factory.js";
+import { ResultFormatterFactory } from "../result-formatter/result-formatter.factory.js";
 
 export class QueryService {
   constructor(
@@ -58,12 +59,15 @@ export class QueryService {
       userId
     );
 
-    const result = await executor.execute(query as never);
+    const result = await executor.execute(query);
+    const formatter = ResultFormatterFactory.create(connection.databaseType);
+
+    const formattedResult = formatter.format(result as never);
 
     return {
-      query,
+      generatedQuery: query,
       analysis,
-      result
+      result: formattedResult
     };
   }
 }
