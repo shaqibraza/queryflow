@@ -22,4 +22,6 @@ const queryController = new QueryController(queryService);
 
 router.post("/", queryController.query);
 
+router.post("/execute", queryController.execute);
+
 export default router;

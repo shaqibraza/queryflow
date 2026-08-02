@@ -70,4 +70,25 @@ export class QueryService {
       result: formattedResult
     };
   }
+
+  async executeQuery(connectionId: string, query: unknown, userId: string) {
+    const connection = await this.metadataService.getConnection(connectionId, userId);
+
+    const executor = ExecutorFactory.createExecutor(
+      connection.databaseType,
+      this.connectionClient,
+      connectionId,
+      userId
+    );
+
+    const result = await executor.execute(query);
+
+    const formatter = ResultFormatterFactory.create(connection.databaseType);
+
+    const formattedResult = formatter.format(result as never);
+
+    return {
+      result: formattedResult
+    };
+  }
 }
