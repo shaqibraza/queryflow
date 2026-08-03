@@ -31,7 +31,7 @@ export function Hero() {
       >
         <motion.div variants={item}>
           <Badge>
-            <IconSparkles size={13} className="text-indigo-300" />
+            <IconSparkles size={13} className="text-yellow-500" />
             AI Powered Database Assistant
           </Badge>
         </motion.div>
