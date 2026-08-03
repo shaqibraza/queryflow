@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "QueryFlow",
+  title: "QueryFlow - AI Powered Database Assistant",
   description: "AI-powered business intelligence platform"
 };
 

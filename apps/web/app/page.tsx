@@ -1,14 +1,23 @@
+import { Navbar } from "@/components/layout/navbar";
+import { Background } from "@/components/layout/background";
+import { Footer } from "@/components/layout/footer";
+import { Hero } from "@/components/landing/hero";
+import { Features } from "@/components/landing/features";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { SupportedDatabases } from "@/components/landing/supported-databases";
+import { CTA } from "@/components/landing/cta";
+
 export default function HomePage() {
   return (
-    <main className="min-h-screen px-6 py-8">
-      <section className="mx-auto flex max-w-6xl flex-col gap-6">
-        <div>
-          <p className="text-sm font-medium text-slate-500">QueryFlow</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-normal text-slate-950">
-            Business intelligence workspace
-          </h1>
-        </div>
-      </section>
+    <main className="relative min-h-screen bg-[#09090B]">
+      <Background />
+      <Navbar />
+      <Hero />
+      <Features />
+      <HowItWorks />
+      <SupportedDatabases />
+      <CTA />
+      <Footer />
     </main>
   );
 }
