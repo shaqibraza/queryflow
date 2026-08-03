@@ -10,7 +10,7 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="flex min-h-[520px] items-center justify-center bg-background lg:mt-20 px-6 py-14 lg:h-full lg:py-10">
+    <div className="flex min-h-[520px] items-center justify-center bg-background px-6 py-14 lg:h-full lg:py-10">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -22,7 +22,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             Welcome 👋
           </h2>
           <p className="mt-1 text-[15px] text-foreground/90 flex items-center justify-center gap-2">
-            Create Your QueryFlow Account
+            Make Your QueryFlow Account
           </p>
           <p className="mt-2 text-[13.5px] text-muted">
             Already have an account?{" "}
