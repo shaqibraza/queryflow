@@ -12,12 +12,15 @@ import { useAuthStore } from "@/src/stores/auth.store";
 import { ConnectionGate } from "@/components/connection/ConnectionGate";
 import { EmptyConnectionCard } from "@/components/connection/EmptyConnectionCard";
 import { cn } from "@/lib/utils";
+import { CreateConnectionDialog } from "@/components/connection/CreateConnectionDialog";
 
 export function DashboardShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>();
 
   const router = useRouter();
+
+  const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const setUser = useAuthStore((state) => state.setUser);
@@ -65,7 +68,7 @@ export function DashboardShell() {
 
       <div
         className={cn(
-          "flex h-screen overflow-hidden bg-background",
+          "flex min-w-0 flex-1 flex-col",
           !hasConnections && "pointer-events-none blur-sm opacity-40"
         )}
       >
@@ -94,11 +97,21 @@ export function DashboardShell() {
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
           <EmptyConnectionCard
             onCreateConnection={() => {
-              console.log("Open Connection Modal");
+              setConnectionDialogOpen(true);
             }}
           />
         </div>
       )}
+      <CreateConnectionDialog
+        open={connectionDialogOpen}
+        onClose={() => setConnectionDialogOpen(false)}
+        onCreated={() => {
+          setConnectionDialogOpen(false);
+
+          // TODO:
+          // Refresh connections here
+        }}
+      />
     </div>
   );
 }

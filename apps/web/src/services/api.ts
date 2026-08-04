@@ -1,6 +1,20 @@
 import axios from "axios";
 import { useAuthStore } from "../stores/auth.store";
 
+function attachAuth(config: any) {
+  const { accessToken, user } = useAuthStore.getState();
+
+  if (accessToken) {
+    config.headers.set("Authorization", `Bearer ${accessToken}`);
+  }
+
+  if (user?.id) {
+    config.headers.set("x-user-id", user.id);
+  }
+
+  return config;
+}
+
 export const authApi = axios.create({
   baseURL: process.env.NEXT_PUBLIC_AUTH_API_URL,
   withCredentials: true,
@@ -9,15 +23,14 @@ export const authApi = axios.create({
   }
 });
 
-authApi.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().accessToken;
-  console.log("FULL STORE", useAuthStore.getState());
+authApi.interceptors.request.use(attachAuth);
 
-  console.log("Interceptor token:", token);
-
-  if (token) {
-    config.headers.set("Authorization", `Bearer ${token}`);
+export const connectionApi = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_CONNECTION_API_URL,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json"
   }
-
-  return config;
 });
+
+connectionApi.interceptors.request.use(attachAuth);
