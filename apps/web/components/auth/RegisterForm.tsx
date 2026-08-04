@@ -1,97 +1,60 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useMemo, useState, type FormEvent } from "react";
-import { PASSWORD_REQUIREMENTS } from "@/lib/password";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { getAuthErrorMessage } from "@/lib/get-auth-error-message";
+import { registerSchema, type RegisterFormData } from "../../src/validators/auth.validator";
+import { AuthService } from "../../src/services/auth.service";
 import { FormInput } from "./FormInput";
 import { OAuthButtons } from "./OAuthButtons";
 import { PasswordStrength } from "./PasswordStrength";
 
-interface FormState {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-type FormErrors = Partial<Record<keyof FormState, string>>;
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const initialState: FormState = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  password: "",
-  confirmPassword: ""
-};
-
 export function RegisterForm() {
-  const [values, setValues] = useState<FormState>(initialState);
-  const [touched, setTouched] = useState<Partial<Record<keyof FormState, boolean>>>({});
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const passwordValid = useMemo(
-    () => PASSWORD_REQUIREMENTS.every((req) => req.test(values.password)),
-    [values.password]
-  );
-
-  const errors: FormErrors = useMemo(() => {
-    const next: FormErrors = {};
-    if (touched.firstName && !values.firstName.trim()) {
-      next.firstName = "First name is required.";
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, touchedFields, isSubmitting }
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    mode: "onBlur",
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
     }
-    if (touched.lastName && !values.lastName.trim()) {
-      next.lastName = "Last name is required.";
+  });
+
+  // Watched only to drive success ticks + the live password strength meter.
+  const values = watch();
+
+  async function onSubmit(data: RegisterFormData) {
+    setSubmitError(null);
+    try {
+      await AuthService.register({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password
+      });
+
+      toast.success("Account created successfully.");
+      router.push("/login");
+    } catch (error) {
+      setSubmitError(getAuthErrorMessage(error));
     }
-    if (touched.email) {
-      if (!values.email.trim()) next.email = "Email address is required.";
-      else if (!EMAIL_PATTERN.test(values.email)) next.email = "Enter a valid email address.";
-    }
-    if (touched.password && !passwordValid) {
-      next.password = "Password doesn't meet the requirements below.";
-    }
-    if (touched.confirmPassword && values.confirmPassword !== values.password) {
-      next.confirmPassword = "Passwords don't match.";
-    }
-    return next;
-  }, [touched, values, passwordValid]);
-
-  const isFormValid =
-    values.firstName.trim() &&
-    values.lastName.trim() &&
-    EMAIL_PATTERN.test(values.email) &&
-    passwordValid &&
-    values.confirmPassword === values.password;
-
-  function handleChange(field: keyof FormState, value: string) {
-    setValues((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function handleBlur(field: keyof FormState) {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setTouched({
-      firstName: true,
-      lastName: true,
-      email: true,
-      password: true,
-      confirmPassword: true
-    });
-    if (!isFormValid) return;
-
-    setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1400));
-    setIsSubmitting(false);
-    setSubmitted(true);
   }
 
   const fieldMotion = (delay: number) => ({
@@ -100,60 +63,27 @@ export function RegisterForm() {
     transition: { duration: 0.4, delay, ease: "easeOut" as const }
   });
 
-  if (submitted) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center gap-3 py-10 text-center"
-      >
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M20 6L9 17l-5-5"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <h3 className="text-[17px] font-semibold text-foreground">Account created</h3>
-        <p className="max-w-[280px] text-[13.5px] leading-relaxed text-muted">
-          Check {values.email || "your inbox"} to verify your email and start querying your
-          databases.
-        </p>
-      </motion.div>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <motion.div {...fieldMotion(0.05)}>
           <FormInput
             label="First Name"
-            name="firstName"
             autoComplete="given-name"
             placeholder="Ada"
-            value={values.firstName}
-            onChange={(e) => handleChange("firstName", e.target.value)}
-            onBlur={() => handleBlur("firstName")}
-            error={errors.firstName}
-            success={touched.firstName && !errors.firstName && !!values.firstName}
+            error={errors.firstName?.message}
+            success={!!touchedFields.firstName && !errors.firstName && !!values.firstName}
+            {...register("firstName")}
           />
         </motion.div>
         <motion.div {...fieldMotion(0.1)}>
           <FormInput
             label="Last Name"
-            name="lastName"
             autoComplete="family-name"
             placeholder="Lovelace"
-            value={values.lastName}
-            onChange={(e) => handleChange("lastName", e.target.value)}
-            onBlur={() => handleBlur("lastName")}
-            error={errors.lastName}
-            success={touched.lastName && !errors.lastName && !!values.lastName}
+            error={errors.lastName?.message}
+            success={!!touchedFields.lastName && !errors.lastName && !!values.lastName}
+            {...register("lastName")}
           />
         </motion.div>
       </div>
@@ -161,29 +91,22 @@ export function RegisterForm() {
       <motion.div {...fieldMotion(0.15)}>
         <FormInput
           label="Email Address"
-          name="email"
           type="email"
           autoComplete="email"
           placeholder="you@company.com"
-          value={values.email}
-          onChange={(e) => handleChange("email", e.target.value)}
-          onBlur={() => handleBlur("email")}
-          error={errors.email}
-          success={touched.email && !errors.email && !!values.email}
+          error={errors.email?.message}
+          success={!!touchedFields.email && !errors.email && !!values.email}
+          {...register("email")}
         />
       </motion.div>
 
       <motion.div {...fieldMotion(0.2)}>
         <FormInput
           label="Password"
-          name="password"
           type={showPassword ? "text" : "password"}
           autoComplete="new-password"
           placeholder="Create a strong password"
-          value={values.password}
-          onChange={(e) => handleChange("password", e.target.value)}
-          onBlur={() => handleBlur("password")}
-          error={errors.password}
+          error={errors.password?.message}
           endAdornment={
             <button
               type="button"
@@ -195,6 +118,7 @@ export function RegisterForm() {
               {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
             </button>
           }
+          {...register("password")}
         />
         <PasswordStrength password={values.password} />
       </motion.div>
@@ -202,15 +126,13 @@ export function RegisterForm() {
       <motion.div {...fieldMotion(0.25)}>
         <FormInput
           label="Confirm Password"
-          name="confirmPassword"
           type={showConfirmPassword ? "text" : "password"}
           autoComplete="new-password"
           placeholder="Re-enter your password"
-          value={values.confirmPassword}
-          onChange={(e) => handleChange("confirmPassword", e.target.value)}
-          onBlur={() => handleBlur("confirmPassword")}
-          error={errors.confirmPassword}
-          success={touched.confirmPassword && !errors.confirmPassword && !!values.confirmPassword}
+          error={errors.confirmPassword?.message}
+          success={
+            !!touchedFields.confirmPassword && !errors.confirmPassword && !!values.confirmPassword
+          }
           endAdornment={
             <button
               type="button"
@@ -222,8 +144,21 @@ export function RegisterForm() {
               {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
             </button>
           }
+          {...register("confirmPassword")}
         />
       </motion.div>
+
+      {submitError && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          role="alert"
+          className="flex items-center gap-2 rounded-lg bg-danger/10 px-3 py-2.5 text-[13px] text-danger"
+        >
+          <AlertCircle size={14} className="shrink-0" />
+          {submitError}
+        </motion.p>
+      )}
 
       <motion.button
         type="submit"

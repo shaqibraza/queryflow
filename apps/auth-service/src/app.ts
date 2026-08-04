@@ -8,7 +8,12 @@ import { errorMiddleware } from "./middleware/error.middleware.js";
 export const createApp = (): express.Express => {
   const app = express();
 
-  app.use(cors());
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true
+    })
+  );
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
@@ -20,7 +25,7 @@ export const createApp = (): express.Express => {
     });
   });
 
-  app.use("/auth", authRoutes);
+  app.use("/", authRoutes);
 
   app.use(errorMiddleware);
 

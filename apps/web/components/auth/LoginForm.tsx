@@ -1,67 +1,53 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useMemo, useState, type FormEvent } from "react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { getAuthErrorMessage } from "@/lib/get-auth-error-message";
+import { loginSchema, type LoginFormData } from "../../src/validators/auth.validator";
+import { AuthService } from "../../src/services/auth.service";
+import { useAuthStore } from "../../src/stores/auth.store";
+import type { AuthResponse } from "../../src/types/auth";
 import { FormInput } from "./FormInput";
 import { OAuthButtons } from "./OAuthButtons";
 
-interface FormState {
-  email: string;
-  password: string;
-}
-
-type FormErrors = Partial<Record<keyof FormState, string>>;
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const initialState: FormState = {
-  email: "",
-  password: ""
-};
-
 export function LoginForm() {
-  const [values, setValues] = useState<FormState>(initialState);
-  const [touched, setTouched] = useState<Partial<Record<keyof FormState, boolean>>>({});
+  const router = useRouter();
+  const login = useAuthStore((state) => state.login);
+
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const errors: FormErrors = useMemo(() => {
-    const next: FormErrors = {};
-    if (touched.email) {
-      if (!values.email.trim()) next.email = "Email address is required.";
-      else if (!EMAIL_PATTERN.test(values.email)) next.email = "Enter a valid email address.";
-    }
-    if (touched.password && !values.password) {
-      next.password = "Password is required.";
-    }
-    return next;
-  }, [touched, values]);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, touchedFields, isSubmitting }
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+    defaultValues: { email: "", password: "" }
+  });
 
-  const isFormValid = EMAIL_PATTERN.test(values.email) && values.password.length > 0;
+  const values = watch();
 
-  function handleChange(field: keyof FormState, value: string) {
+  async function onSubmit(data: LoginFormData) {
     setAuthError(null);
-    setValues((prev) => ({ ...prev, [field]: value }));
-  }
+    try {
+      const result = (await AuthService.login({
+        email: data.email,
+        password: data.password
+      })) as AuthResponse;
 
-  function handleBlur(field: keyof FormState) {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  }
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setTouched({ email: true, password: true });
-    if (!isFormValid) return;
-
-    setAuthError(null);
-    setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1400));
-    setIsSubmitting(false);
-    setSubmitted(true);
+      login(result.user, result.accessToken);
+      router.push("/dashboard");
+    } catch (error) {
+      setAuthError(getAuthErrorMessage(error));
+    }
   }
 
   const fieldMotion = (delay: number) => ({
@@ -70,60 +56,27 @@ export function LoginForm() {
     transition: { duration: 0.4, delay, ease: "easeOut" as const }
   });
 
-  if (submitted) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center gap-3 py-10 text-center"
-      >
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M20 6L9 17l-5-5"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <h3 className="text-[17px] font-semibold text-foreground">Welcome back</h3>
-        <p className="max-w-[280px] text-[13.5px] leading-relaxed text-muted">
-          You're signed in as {values.email || "your account"}. Redirecting you to your databases.
-        </p>
-      </motion.div>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
       <motion.div {...fieldMotion(0.05)}>
         <FormInput
           label="Email Address"
-          name="email"
           type="email"
           autoComplete="email"
           placeholder="you@company.com"
-          value={values.email}
-          onChange={(e) => handleChange("email", e.target.value)}
-          onBlur={() => handleBlur("email")}
-          error={errors.email}
-          success={touched.email && !errors.email && !!values.email}
+          error={errors.email?.message}
+          success={!!touchedFields.email && !errors.email && !!values.email}
+          {...register("email")}
         />
       </motion.div>
 
       <motion.div {...fieldMotion(0.1)}>
         <FormInput
           label="Password"
-          name="password"
           type={showPassword ? "text" : "password"}
           autoComplete="current-password"
           placeholder="Enter your password"
-          value={values.password}
-          onChange={(e) => handleChange("password", e.target.value)}
-          onBlur={() => handleBlur("password")}
-          error={errors.password}
+          error={errors.password?.message}
           endAdornment={
             <button
               type="button"
@@ -135,6 +88,7 @@ export function LoginForm() {
               {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
             </button>
           }
+          {...register("password")}
         />
         <div className="mt-1.5 flex justify-end">
           <a
@@ -163,8 +117,10 @@ export function LoginForm() {
         <motion.p
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-lg bg-danger/10 px-3 py-2 text-[13px] text-danger"
+          role="alert"
+          className="flex items-center gap-2 rounded-lg bg-danger/10 px-3 py-2.5 text-[13px] text-danger"
         >
+          <AlertCircle size={14} className="shrink-0" />
           {authError}
         </motion.p>
       )}
