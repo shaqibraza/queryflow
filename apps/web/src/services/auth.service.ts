@@ -22,7 +22,7 @@ export class AuthService {
   static async login(payload: LoginPayload) {
     const { data } = await authApi.post("/login", payload);
 
-    return data;
+    return data.data;
   }
 
   static async logout() {
@@ -34,7 +34,7 @@ export class AuthService {
   static async me() {
     const { data } = await authApi.get("/me");
 
-    return data;
+    return data.data;
   }
 
   static async refresh() {

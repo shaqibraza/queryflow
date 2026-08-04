@@ -6,6 +6,9 @@ import { recentConversations } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import { UserProfileCard } from "@/components/profile/UserProfileCard";
 import { SidebarItem } from "./SidebarItem";
+import { useAuthStore } from "@/src/stores/auth.store";
+import { useRouter } from "next/navigation";
+import { AuthService } from "@/src/services/auth.service";
 
 interface SidebarProps {
   open: boolean;
@@ -13,6 +16,7 @@ interface SidebarProps {
   activeConversationId?: string;
   onSelectConversation: (id: string) => void;
   onNewChat: () => void;
+  className?: string;
 }
 
 export function Sidebar({
@@ -20,8 +24,26 @@ export function Sidebar({
   onClose,
   activeConversationId,
   onSelectConversation,
-  onNewChat
+  onNewChat,
+  className
 }: SidebarProps) {
+  const user = useAuthStore((state) => state.user);
+
+  const router = useRouter();
+
+  const logout = useAuthStore((state) => state.logout);
+
+  async function handleLogout() {
+    try {
+      await AuthService.logout();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      logout();
+      router.replace("/login");
+    }
+  }
+
   return (
     <>
       {open && (
@@ -36,7 +58,8 @@ export function Sidebar({
         animate={{ x: 0 }}
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-[264px] shrink-0 flex-col border-r border-border bg-[#0a0a0d]/95 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0",
-          open ? "translate-x-0" : "-translate-x-full"
+          open ? "translate-x-0" : "-translate-x-full",
+          className
         )}
       >
         <div className="flex items-center justify-between px-4 pt-5">
@@ -93,13 +116,16 @@ export function Sidebar({
 
           <div className="space-y-0.5">
             <SidebarItem icon={Cable} label="Connections" />
-            <SidebarItem icon={Clock} label="History" />
-            <SidebarItem icon={Settings} label="Settings" />
           </div>
         </div>
 
         <div className="border-t border-border p-3">
-          <UserProfileCard name="Ada Lovelace" email="ada@queryflow.io" onLogout={() => {}} />
+          <UserProfileCard
+            name={user ? `${user.firstName} ${user.lastName}` : "Loading..."}
+            email={user?.email ?? ""}
+            avatar={user?.avatar}
+            onLogout={handleLogout}
+          />
         </div>
       </motion.aside>
     </>
