@@ -26,7 +26,7 @@ export const authApi = axios.create({
 authApi.interceptors.request.use(attachAuth);
 
 export const connectionApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_CONNECTION_API_URL,
+  baseURL: `${process.env.NEXT_PUBLIC_CONNECTION_API_URL}/connections`,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json"

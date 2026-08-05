@@ -2,6 +2,16 @@ import { connectionApi } from "./api";
 
 export type DatabaseType = "POSTGRESQL" | "MYSQL" | "MONGODB";
 
+export interface DatabaseConnection {
+  id: string;
+  name: string;
+  databaseType: DatabaseType;
+  ownerId: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CreateConnectionPayload {
   name: string;
   databaseType: DatabaseType;
@@ -15,13 +25,13 @@ export class ConnectionService {
     return data.data;
   }
 
-  static async getConnections() {
+  static async getConnections(): Promise<DatabaseConnection[]> {
     const { data } = await connectionApi.get("/");
 
     return data.data;
   }
 
-  static async getConnection(id: string) {
+  static async getConnection(id: string): Promise<DatabaseConnection> {
     const { data } = await connectionApi.get(`/${id}`);
 
     return data.data;

@@ -15,6 +15,7 @@
     "@queryflow/shared": "workspace:*",
     "@queryflow/types": "workspace:*",
     "@queryflow/utils": "workspace:*",
+    "cors": "^2.8.6",
     "csv-parse": "^5.6.0",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",
@@ -29,6 +30,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
     "@types/pg": "^8.20.0",

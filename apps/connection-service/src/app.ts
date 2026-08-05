@@ -1,5 +1,6 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
+import cors from "cors";
 
 import { HealthController } from "./controllers/health.controller.js";
 import { ConnectionController } from "./controllers/connection.controller.js";
@@ -32,6 +33,14 @@ export const createApp = (): express.Express => {
   const healthController = new HealthController(healthService);
 
   const connectionController = new ConnectionController(connectionService);
+
+  // cors
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true
+    })
+  );
 
   // Middlewares
   app.use(express.json());

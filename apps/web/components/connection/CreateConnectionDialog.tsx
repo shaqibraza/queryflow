@@ -3,12 +3,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Database, X } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { ConnectionService, DatabaseType } from "@/src/services/connection.service";
 
 interface CreateConnectionDialogProps {
   open: boolean;
   onClose: () => void;
-  onCreated?: () => void;
+  onCreated?: (connection: any) => void;
 }
 
 export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConnectionDialogProps) {
@@ -21,24 +22,47 @@ export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConne
   const [databaseUrl, setDatabaseUrl] = useState("");
 
   async function handleCreate() {
+    console.log("Create button clicked");
+    if (!name.trim()) {
+      toast.error("Connection name is required.");
+      return;
+    }
+
+    if (!databaseUrl.trim()) {
+      toast.error("Database URL is required.");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      await ConnectionService.createConnection({
+      console.log("Sending request...", {
         name,
         databaseType,
         databaseUrl
       });
 
-      onCreated?.();
+      const connection = await ConnectionService.createConnection({
+        name,
+        databaseType,
+        databaseUrl
+      });
+      console.log("Create response:", connection);
 
-      onClose();
+      toast.success("Connection created successfully.");
+
+      onCreated?.(connection);
 
       setName("");
       setDatabaseUrl("");
       setDatabaseType("POSTGRESQL");
-    } catch (error) {
+
+      onClose();
+    } catch (error: any) {
       console.error(error);
+      console.error("CREATE ERROR:", error);
+
+      toast.error(error?.response?.data?.message ?? "Failed to create connection.");
     } finally {
       setLoading(false);
     }

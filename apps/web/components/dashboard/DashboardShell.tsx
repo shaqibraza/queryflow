@@ -1,35 +1,89 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
-import {} from "react";
-import { useState, useEffect } from "react";
-import { ConnectionSelector } from "@/components/connection/ConnectionSelector";
-import { ChatWorkspace } from "@/components/chat/ChatWorkspace";
-import { Sidebar } from "./Sidebar";
 import { useRouter } from "next/navigation";
-import { AuthService } from "@/src/services/auth.service";
-import { useAuthStore } from "@/src/stores/auth.store";
+
+import { Sidebar } from "./Sidebar";
+import { ChatWorkspace } from "@/components/chat/ChatWorkspace";
 import { ConnectionGate } from "@/components/connection/ConnectionGate";
+import { ConnectionSelector } from "@/components/connection/ConnectionSelector";
 import { EmptyConnectionCard } from "@/components/connection/EmptyConnectionCard";
-import { cn } from "@/lib/utils";
 import { CreateConnectionDialog } from "@/components/connection/CreateConnectionDialog";
 
-export function DashboardShell() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeConversationId, setActiveConversationId] = useState<string | undefined>();
+import { cn } from "@/lib/utils";
 
+import { AuthService } from "@/src/services/auth.service";
+import { ConnectionService, type DatabaseType } from "@/src/services/connection.service";
+import { useAuthStore } from "@/src/stores/auth.store";
+
+interface DatabaseConnection {
+  id: string;
+  name: string;
+  databaseType: DatabaseType;
+  ownerId?: string;
+  isActive?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export function DashboardShell() {
   const router = useRouter();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [activeConversationId, setActiveConversationId] = useState<string | undefined>();
 
   const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
 
+  const [connections, setConnections] = useState<DatabaseConnection[]>([]);
+
+  const [selectedConnection, setSelectedConnection] = useState<DatabaseConnection | null>(null);
+
+  const [loadingConnections, setLoadingConnections] = useState(true);
+
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   const setUser = useAuthStore((state) => state.setUser);
+
   const logout = useAuthStore((state) => state.logout);
 
+  async function loadConnections() {
+    try {
+      setLoadingConnections(true);
+
+      const list = await ConnectionService.getConnections();
+
+      setConnections(list);
+
+      setSelectedConnection((prev) => {
+        if (list.length === 0) {
+          return null;
+        }
+
+        if (!prev) {
+          return list[0];
+        }
+
+        const exists = list.find((connection) => connection.id === prev.id);
+
+        console.log("connections state:", connections);
+
+        console.log("connections.length:", connections.length);
+
+        console.log("hasConnections:", hasConnections);
+
+        return exists ?? list[0];
+      });
+    } catch (error) {
+      console.error("Failed to load connections", error);
+    } finally {
+      setLoadingConnections(false);
+    }
+  }
+
   useEffect(() => {
-    console.log("isAuthenticated:", isAuthenticated);
     if (!isAuthenticated) {
-      console.log("Redirecting because not authenticated");
       router.replace("/login");
       return;
     }
@@ -39,8 +93,11 @@ export function DashboardShell() {
         const user = await AuthService.me();
 
         setUser(user);
+
+        await loadConnections();
       } catch (error) {
-        console.error("ME ERROR", error);
+        console.error(error);
+
         await AuthService.logout().catch(() => {});
 
         logout();
@@ -52,8 +109,7 @@ export function DashboardShell() {
     syncUser();
   }, [isAuthenticated, logout, router, setUser]);
 
-  // TODO: Backend se replace karenge
-  const hasConnections = false;
+  const hasConnections = connections.length > 0;
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -77,39 +133,41 @@ export function DashboardShell() {
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              suppressHydrationWarning
               className="focus-ring rounded-lg p-1.5 text-muted hover:text-foreground lg:hidden"
-              aria-label="Open sidebar"
             >
               <Menu size={18} />
             </button>
-            <ConnectionSelector />
+
+            <ConnectionSelector
+              connections={connections}
+              selected={selectedConnection}
+              onSelect={setSelectedConnection}
+              onRefresh={loadConnections}
+              onAddConnection={() => setConnectionDialogOpen(true)}
+            />
           </div>
         </header>
 
         <main className="min-h-0 flex-1">
-          <ConnectionGate>
+          <ConnectionGate hasConnection={hasConnections}>
             <ChatWorkspace />
           </ConnectionGate>
         </main>
       </div>
-      {!hasConnections && (
+
+      {!loadingConnections && !hasConnections && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
-          <EmptyConnectionCard
-            onCreateConnection={() => {
-              setConnectionDialogOpen(true);
-            }}
-          />
+          <EmptyConnectionCard onCreateConnection={() => setConnectionDialogOpen(true)} />
         </div>
       )}
+
       <CreateConnectionDialog
         open={connectionDialogOpen}
         onClose={() => setConnectionDialogOpen(false)}
-        onCreated={() => {
+        onCreated={async () => {
           setConnectionDialogOpen(false);
 
-          // TODO:
-          // Refresh connections here
+          await loadConnections();
         }}
       />
     </div>

@@ -111,12 +111,6 @@ export function Sidebar({
               />
             ))}
           </div>
-
-          <div className="my-4 h-px bg-border" />
-
-          <div className="space-y-0.5">
-            <SidebarItem icon={Cable} label="Connections" />
-          </div>
         </div>
 
         <div className="border-t border-border p-3">
