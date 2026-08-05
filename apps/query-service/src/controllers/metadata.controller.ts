@@ -141,4 +141,35 @@ export class MetadataController {
       next(error);
     }
   };
+
+  collectMetadata = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.header("x-user-id");
+
+      if (!userId || typeof userId !== "string") {
+        return res.status(400).json({
+          success: false,
+          message: "Unauthorized"
+        });
+      }
+
+      const connectionId = req.params.connectionId;
+
+      if (!connectionId || typeof connectionId !== "string") {
+        return res.status(400).json({
+          success: false,
+          message: "Connection ID is required"
+        });
+      }
+
+      const metadata = await this.metadataService.collectMetadata(connectionId, userId);
+
+      return res.status(200).json({
+        success: true,
+        data: metadata
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -57,6 +57,53 @@ export class ConnectionService {
 
   static async getTables(connectionId: string) {
     const { data } = await connectionApi.get(`/${connectionId}/tables`);
+    return data.data;
+  }
+
+  static async getColumns(connectionId: string, table: string) {
+    const { data } = await connectionApi.get(`/${connectionId}/tables/${table}/columns`);
+
+    return data.data;
+  }
+
+  static async getPrimaryKeys(connectionId: string, table: string) {
+    const { data } = await connectionApi.get(`/${connectionId}/tables/${table}/primary-key`);
+
+    return data.data;
+  }
+
+  static async getRelations(connectionId: string) {
+    const { data } = await connectionApi.get(`/${connectionId}/relations`);
+
+    return data.data;
+  }
+
+  static async getIndexes(connectionId: string) {
+    const { data } = await connectionApi.get(`/${connectionId}/indexes`);
+
+    return data.data;
+  }
+
+  static async getViews(connectionId: string) {
+    const { data } = await connectionApi.get(`/${connectionId}/views`);
+
+    return data.data;
+  }
+
+  static async getFunctions(connectionId: string) {
+    const { data } = await connectionApi.get(`/${connectionId}/functions`);
+
+    return data.data;
+  }
+
+  static async getSchemas(connectionId: string) {
+    const { data } = await connectionApi.get(`/${connectionId}/schemas`);
+
+    return data.data;
+  }
+
+  static async getDatabaseInfo(connectionId: string) {
+    const { data } = await connectionApi.get(`/${connectionId}/info`);
 
     return data.data;
   }

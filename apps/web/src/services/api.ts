@@ -34,3 +34,14 @@ export const connectionApi = axios.create({
 });
 
 connectionApi.interceptors.request.use(attachAuth);
+
+export const queryApi = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_QUERY_API_URL,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json"
+  }
+});
+console.log("QUERY API BASE =", queryApi.defaults.baseURL);
+
+queryApi.interceptors.request.use(attachAuth);

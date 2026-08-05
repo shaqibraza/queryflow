@@ -1,9 +1,10 @@
 "use client";
 
+import { MetadataService, type DatabaseMetadata } from "@/src/services/metadata.service";
 import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import { useMetadataStore } from "@/src/stores/metadata.store";
 import { Sidebar } from "./Sidebar";
 import { ChatWorkspace } from "@/components/chat/ChatWorkspace";
 import { ConnectionGate } from "@/components/connection/ConnectionGate";
@@ -76,7 +77,7 @@ export function DashboardShell() {
         return exists ?? list[0];
       });
       if (list.length > 0) {
-        await loadSchema(list[0].id);
+        await loadMetadata(list[0].id);
       }
     } catch (error) {
       console.error("Failed to load connections", error);
@@ -114,19 +115,43 @@ export function DashboardShell() {
 
   const hasConnections = connections.length > 0;
 
-  const [tables, setTables] = useState<string[]>([]);
+  const metadata = useMetadataStore((state) => state.metadata);
 
-  async function loadSchema(connectionId: string) {
+  const getCachedMetadata = useMetadataStore((state) => state.getMetadata);
+
+  const setMetadata = useMetadataStore((state) => state.setMetadata);
+
+  const setMetadataLoading = useMetadataStore((state) => state.setLoading);
+
+  async function loadMetadata(connectionId: string) {
+    const cached = getCachedMetadata(connectionId);
+
+    if (cached) {
+      console.log("Metadata loaded from cache.");
+
+      setMetadata(connectionId, cached);
+
+      return;
+    }
+
     try {
-      const tables = await ConnectionService.getTables(connectionId);
+      setMetadataLoading(true);
 
-      setTables(tables);
+      const metadata = await MetadataService.getMetadata(connectionId);
 
-      console.log("Tables:", tables);
+      setMetadata(connectionId, metadata);
+
+      console.log("Metadata fetched from server.");
     } catch (error) {
-      console.error("Failed to load schema", error);
+      console.error("Failed to load metadata", error);
+    } finally {
+      setMetadataLoading(false);
     }
   }
+
+  useEffect(() => {
+    console.log("Metadata Store:", metadata);
+  }, [metadata]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -160,7 +185,7 @@ export function DashboardShell() {
               selected={selectedConnection}
               onSelect={async (connection) => {
                 setSelectedConnection(connection);
-                await loadSchema(connection.id);
+                await loadMetadata(connection.id);
               }}
               onRefresh={loadConnections}
               onAddConnection={() => setConnectionDialogOpen(true)}

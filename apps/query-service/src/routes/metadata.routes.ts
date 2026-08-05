@@ -20,4 +20,6 @@ router.get("/:connectionId/schemas", metadataController.getSchemas);
 
 router.get("/:connectionId/database-info", metadataController.getDatabaseInfo);
 
+router.get("/:connectionId", metadataController.collectMetadata);
+
 export default router;
