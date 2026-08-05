@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { Database, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Database, Loader2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ConnectionService, DatabaseType } from "@/src/services/connection.service";
@@ -22,7 +22,6 @@ export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConne
   const [databaseUrl, setDatabaseUrl] = useState("");
 
   async function handleCreate() {
-    console.log("Create button clicked");
     if (!name.trim()) {
       toast.error("Connection name is required.");
       return;
@@ -36,18 +35,11 @@ export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConne
     try {
       setLoading(true);
 
-      console.log("Sending request...", {
-        name,
-        databaseType,
-        databaseUrl
-      });
-
       const connection = await ConnectionService.createConnection({
         name,
         databaseType,
         databaseUrl
       });
-      console.log("Create response:", connection);
 
       toast.success("Connection created successfully.");
 
@@ -59,10 +51,7 @@ export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConne
 
       onClose();
     } catch (error: any) {
-      console.error(error);
-      console.error("CREATE ERROR:", error);
-
-      toast.error(error?.response?.data?.message ?? "Failed to create connection.");
+      toast.error(error?.response?.data?.error?.message ?? "Failed to create connection.");
     } finally {
       setLoading(false);
     }
@@ -76,7 +65,9 @@ export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConne
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={() => {
+              if (!loading) onClose();
+            }}
             className="fixed inset-0 z-[999] bg-black/70 backdrop-blur-sm"
           />
 
@@ -101,7 +92,11 @@ export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConne
                   </div>
                 </div>
 
-                <button onClick={onClose} className="rounded-lg p-2 hover:bg-white/[0.05]">
+                <button
+                  disabled={loading}
+                  onClick={onClose}
+                  className="rounded-lg p-2 transition hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+                >
                   <X size={18} />
                 </button>
               </div>
@@ -111,10 +106,11 @@ export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConne
                   <label className="mb-2 block text-sm font-medium">Connection Name</label>
 
                   <input
+                    disabled={loading}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Production Database"
-                    className="h-11 w-full rounded-xl border border-border bg-background px-4"
+                    className="h-11 w-full rounded-xl border border-border bg-background px-4 disabled:opacity-60"
                   />
                 </div>
 
@@ -122,14 +118,13 @@ export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConne
                   <label className="mb-2 block text-sm font-medium">Database Type</label>
 
                   <select
+                    disabled={loading}
                     value={databaseType}
                     onChange={(e) => setDatabaseType(e.target.value as DatabaseType)}
-                    className="h-11 w-full rounded-xl border border-border bg-background px-4"
+                    className="h-11 w-full rounded-xl border border-border bg-background px-4 disabled:opacity-60"
                   >
                     <option value="POSTGRESQL">PostgreSQL</option>
-
                     <option value="MYSQL">MySQL</option>
-
                     <option value="MONGODB">MongoDB</option>
                   </select>
                 </div>
@@ -138,20 +133,28 @@ export function CreateConnectionDialog({ open, onClose, onCreated }: CreateConne
                   <label className="mb-2 block text-sm font-medium">Database URL</label>
 
                   <textarea
+                    disabled={loading}
                     rows={4}
                     value={databaseUrl}
                     onChange={(e) => setDatabaseUrl(e.target.value)}
                     placeholder="postgresql://username:password@localhost:5432/db"
-                    className="w-full rounded-xl border border-border bg-background p-4"
+                    className="w-full rounded-xl border border-border bg-background p-4 disabled:opacity-60"
                   />
                 </div>
 
                 <button
                   disabled={loading}
                   onClick={handleCreate}
-                  className="flex h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-accent to-accent-deep font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-accent-deep font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {loading ? "Creating..." : "Create Connection"}
+                  {loading ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Creating Connection...
+                    </>
+                  ) : (
+                    "Create Connection"
+                  )}
                 </button>
               </div>
             </motion.div>

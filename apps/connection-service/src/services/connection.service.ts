@@ -4,9 +4,59 @@ import { decrypt, encrypt } from "../utils/encryption.js";
 import { ConnectorFactory } from "../factories/connector.factory.js";
 import { TableReaderFactory } from "../schema/factories/table-reader.factory.js";
 import { MongoCommand } from "@queryflow/shared";
+import { AppError } from "../errors/app-error.js";
 
 export class ConnectionService {
   constructor(private readonly connectionRepository: ConnectionRepository) {}
+
+  private async validateConnection(databaseType: DatabaseType, connectionString: string) {
+    const connector = ConnectorFactory.create(databaseType, connectionString);
+
+    try {
+      await connector.testConnection();
+    } catch (error: any) {
+      switch (error.code) {
+        // PostgreSQL
+        case "28P01":
+          throw new AppError(400, "Invalid username or password.");
+
+        case "3D000":
+          throw new AppError(400, "Database does not exist.");
+
+        case "ECONNREFUSED":
+          throw new AppError(400, "Unable to connect to the database server.");
+
+        // MongoDB
+        case 8000:
+          throw new AppError(400, "Invalid username or password.");
+      }
+
+      // MongoDB DNS Error
+      if (error.code === "ENOTFOUND" || error.message?.includes("ENOTFOUND")) {
+        throw new AppError(
+          400,
+          "Unable to reach the MongoDB server. Please check your connection string."
+        );
+      }
+
+      // Network Timeout
+      if (error.code === "ETIMEDOUT" || error.code === "ECONNREFUSED") {
+        throw new AppError(400, "Unable to connect to the database server.");
+      }
+
+      // MongoDB Authentication
+      if (
+        error.message?.includes("Authentication failed") ||
+        error.errmsg?.includes("Authentication failed")
+      ) {
+        throw new AppError(400, "Invalid username or password.");
+      }
+
+      throw new AppError(400, error.message || "Failed to connect to the database.");
+    } finally {
+      await connector.disconnect();
+    }
+  }
 
   async createConnection(data: {
     name: string;
@@ -14,6 +64,8 @@ export class ConnectionService {
     databaseUrl: string;
     ownerId: string;
   }) {
+    await this.validateConnection(data.databaseType, data.databaseUrl);
+
     const encryptedUrl = encrypt(data.databaseUrl);
 
     return this.connectionRepository.create({
@@ -78,9 +130,7 @@ export class ConnectionService {
 
     const connectionString = decrypt(connection.encryptedUrl);
 
-    const connector = ConnectorFactory.create(connection.databaseType, connectionString);
-
-    await connector.testConnection();
+    await this.validateConnection(connection.databaseType, connectionString);
 
     return {
       success: true,

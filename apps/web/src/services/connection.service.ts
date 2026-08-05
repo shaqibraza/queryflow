@@ -54,4 +54,10 @@ export class ConnectionService {
 
     return data;
   }
+
+  static async getTables(connectionId: string) {
+    const { data } = await connectionApi.get(`/${connectionId}/tables`);
+
+    return data.data;
+  }
 }

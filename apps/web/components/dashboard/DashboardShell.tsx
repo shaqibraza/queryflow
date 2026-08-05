@@ -75,6 +75,9 @@ export function DashboardShell() {
 
         return exists ?? list[0];
       });
+      if (list.length > 0) {
+        await loadSchema(list[0].id);
+      }
     } catch (error) {
       console.error("Failed to load connections", error);
     } finally {
@@ -111,6 +114,20 @@ export function DashboardShell() {
 
   const hasConnections = connections.length > 0;
 
+  const [tables, setTables] = useState<string[]>([]);
+
+  async function loadSchema(connectionId: string) {
+    try {
+      const tables = await ConnectionService.getTables(connectionId);
+
+      setTables(tables);
+
+      console.log("Tables:", tables);
+    } catch (error) {
+      console.error("Failed to load schema", error);
+    }
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar
@@ -141,7 +158,10 @@ export function DashboardShell() {
             <ConnectionSelector
               connections={connections}
               selected={selectedConnection}
-              onSelect={setSelectedConnection}
+              onSelect={async (connection) => {
+                setSelectedConnection(connection);
+                await loadSchema(connection.id);
+              }}
               onRefresh={loadConnections}
               onAddConnection={() => setConnectionDialogOpen(true)}
             />

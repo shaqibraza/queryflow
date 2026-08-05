@@ -19,12 +19,15 @@ export class ConnectionController {
           message: "Unauthorized"
         });
       }
+      console.log("CREATE OWNER:", ownerId);
+      console.log("BODY:", body);
 
       const connection = await this.connectionService.createConnection({
         ...body,
         ownerId
       });
 
+      console.log("Connection-service after create connection:", connection);
       return res.status(201).json({
         success: true,
         data: connection
@@ -43,6 +46,7 @@ export class ConnectionController {
           message: "Unauthorized"
         });
       }
+      console.log("GET OWNER:", ownerId);
 
       const connections = await this.connectionService.getConnections(ownerId);
 
