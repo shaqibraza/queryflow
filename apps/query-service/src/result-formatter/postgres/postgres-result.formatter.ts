@@ -2,18 +2,34 @@ import { ResultFormatter } from "../interfaces/result-formatter.js";
 import { FormattedResult } from "../types/formatted-result.js";
 
 interface PostgresResult {
+  command: string;
+
   rows: Record<string, unknown>[];
+
   rowCount: number;
+
+  fields: {
+    name: string;
+    dataTypeId: number;
+  }[];
 }
 
 export class PostgresResultFormatter implements ResultFormatter<PostgresResult> {
   format(result: PostgresResult): FormattedResult {
-    const firstRow = result.rows[0] ?? {};
+    if (result.command !== "SELECT") {
+      return {
+        type: "WRITE",
+        command: result.command,
+        affectedRows: result.rowCount
+      };
+    }
 
     return {
-      columns: Object.keys(firstRow).map((key) => ({
-        key,
-        label: this.formatLabel(key)
+      type: "READ",
+
+      columns: result.fields.map((field) => ({
+        key: field.name,
+        label: this.formatLabel(field.name)
       })),
 
       rows: result.rows,

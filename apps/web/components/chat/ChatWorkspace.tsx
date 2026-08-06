@@ -17,6 +17,8 @@ interface Message {
 
   content: string;
 
+  connectionId?: string;
+
   sql?: string;
 
   result?: any;
@@ -28,16 +30,8 @@ interface Message {
   };
 }
 
-let idCounter = 0;
-
 function nextId() {
-  idCounter += 1;
-
-  const id = `msg-${idCounter}`;
-
-  console.log("Generated ID:", id);
-
-  return id;
+  return crypto.randomUUID();
 }
 
 interface ChatWorkspaceProps {
@@ -104,9 +98,15 @@ export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
       const assistantMessage: Message = {
         id: nextId(),
         role: "assistant",
+
+        connectionId: selectedConnection.id,
+
         content: response.message ?? "Query generated successfully.",
+
         sql: response.generatedQuery ?? undefined,
+
         result: response.result,
+
         analysis: response.analysis
       };
 
@@ -119,6 +119,35 @@ export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
 
         return updated;
       });
+
+      async function executeQuery(messageId: string) {
+        const message = messages.find((m) => m.id === messageId);
+
+        if (!message?.sql || !message.connectionId) {
+          return;
+        }
+
+        try {
+          console.log("Executing Query:", message.sql);
+
+          const response = await ChatService.execute(message.connectionId, message.sql);
+
+          console.log("Execution Response:", response);
+
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === messageId
+                ? {
+                    ...msg,
+                    result: response.result
+                  }
+                : msg
+            )
+          );
+        } catch (error) {
+          console.error("Execution Failed", error);
+        }
+      }
     } catch (error) {
       console.error(error);
 
@@ -166,6 +195,35 @@ export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
                     sql={message.sql}
                     result={message.result}
                     analysis={message.analysis}
+                    onExecute={async () => {
+                      if (!message.sql || !message.connectionId) {
+                        return;
+                      }
+
+                      try {
+                        console.log("Executing Query:", message.sql);
+
+                        const response = await ChatService.execute(
+                          message.connectionId,
+                          message.sql
+                        );
+
+                        console.log("Execution Response:", response);
+
+                        setMessages((prev) =>
+                          prev.map((m) =>
+                            m.id === message.id
+                              ? {
+                                  ...m,
+                                  result: response.result
+                                }
+                              : m
+                          )
+                        );
+                      } catch (error) {
+                        console.error("Execution Failed", error);
+                      }
+                    }}
                   />
                 )
               )}

@@ -1,4 +1,6 @@
-export interface FormattedResult {
+export interface ReadResult {
+  type: "READ";
+
   columns: {
     key: string;
     label: string;
@@ -8,3 +10,13 @@ export interface FormattedResult {
 
   totalRows: number;
 }
+
+export interface WriteResult {
+  type: "WRITE";
+
+  command: string;
+
+  affectedRows: number;
+}
+
+export type FormattedResult = ReadResult | WriteResult;

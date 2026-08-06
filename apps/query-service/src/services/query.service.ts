@@ -58,7 +58,7 @@ export class QueryService {
     // WRITE / DDL
     if (analysis.requiresConfirmation) {
       return {
-        query,
+        generatedQuery: query,
         analysis
       };
     }

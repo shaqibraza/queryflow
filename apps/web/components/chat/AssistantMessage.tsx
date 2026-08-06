@@ -5,6 +5,7 @@ import { Database } from "lucide-react";
 import { useState } from "react";
 import { ResultTable } from "./ResultTable";
 import { SQLCard } from "./SQLCard";
+import { ExecutionResult } from "../ui/ExecutionResult";
 
 interface AssistantMessageProps {
   reply: string;
@@ -18,17 +19,35 @@ interface AssistantMessageProps {
     requiresConfirmation: boolean;
     firstKeyword: string;
   };
+
+  onExecute?: () => Promise<void>;
 }
 
-export function AssistantMessage({ reply, sql, result, analysis }: AssistantMessageProps) {
+export function AssistantMessage({
+  reply,
+  sql,
+  result,
+  analysis,
+  onExecute
+}: AssistantMessageProps) {
   const [explained, setExplained] = useState(false);
   const [executing, setExecuting] = useState(false);
   const [executed, setExecuted] = useState(false);
 
-  function handleExecute() {
-    console.log("Execute confirmed.");
+  async function handleExecute() {
+    if (!onExecute) {
+      return;
+    }
 
-    setExecuted(true);
+    try {
+      setExecuting(true);
+
+      await onExecute();
+
+      setExecuted(true);
+    } finally {
+      setExecuting(false);
+    }
   }
 
   return (
@@ -41,8 +60,10 @@ export function AssistantMessage({ reply, sql, result, analysis }: AssistantMess
       <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-accent-deep">
         <Database size={13} className="text-white" />
       </div>
+
       <div className="min-w-0 flex-1 space-y-3">
         <p className="text-[13.5px] leading-relaxed text-foreground">{reply}</p>
+
         {sql && (
           <SQLCard
             sql={sql}
@@ -53,12 +74,15 @@ export function AssistantMessage({ reply, sql, result, analysis }: AssistantMess
             isExecuted={executed}
           />
         )}
-        {result && <ResultTable result={result} />}
-        {analysis?.requiresConfirmation && (
+
+        {analysis?.requiresConfirmation && !executed && (
           <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 text-sm text-yellow-300">
             This query modifies data and requires confirmation before execution.
           </div>
         )}
+
+        {result?.type === "READ" && <ResultTable result={result} />}
+        {result?.type === "WRITE" && <ExecutionResult result={result} />}
       </div>
     </motion.div>
   );
