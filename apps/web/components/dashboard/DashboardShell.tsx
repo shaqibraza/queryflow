@@ -195,7 +195,7 @@ export function DashboardShell() {
 
         <main className="min-h-0 flex-1">
           <ConnectionGate hasConnection={hasConnections}>
-            <ChatWorkspace />
+            <ChatWorkspace selectedConnection={selectedConnection} />
           </ConnectionGate>
         </main>
       </div>

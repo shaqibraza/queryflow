@@ -3,12 +3,24 @@ import { FormattedResult } from "../types/formatted-result.js";
 
 export class MysqlResultFormatter implements ResultFormatter<Record<string, unknown>[]> {
   format(rows: Record<string, unknown>[]): FormattedResult {
+    const firstRow = rows[0] ?? {};
+
     return {
-      columns: rows.length ? Object.keys(rows[0]) : [],
+      columns: Object.keys(firstRow).map((key) => ({
+        key,
+        label: this.formatLabel(key)
+      })),
 
       rows,
 
-      count: rows.length
+      totalRows: rows.length
     };
+  }
+
+  private formatLabel(key: string): string {
+    return key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/_/g, " ")
+      .replace(/^./, (char) => char.toUpperCase());
   }
 }

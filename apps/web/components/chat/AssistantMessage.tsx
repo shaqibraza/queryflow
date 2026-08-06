@@ -3,27 +3,32 @@
 import { motion } from "framer-motion";
 import { Database } from "lucide-react";
 import { useState } from "react";
-import { mockResult, type QueryResult } from "@/lib/mock-data";
 import { ResultTable } from "./ResultTable";
 import { SQLCard } from "./SQLCard";
 
 interface AssistantMessageProps {
   reply: string;
-  sql: string;
-  result?: QueryResult;
+
+  sql?: string;
+
+  result?: any;
+
+  analysis?: {
+    type: string;
+    requiresConfirmation: boolean;
+    firstKeyword: string;
+  };
 }
 
-export function AssistantMessage({ reply, sql, result = mockResult }: AssistantMessageProps) {
+export function AssistantMessage({ reply, sql, result, analysis }: AssistantMessageProps) {
   const [explained, setExplained] = useState(false);
   const [executing, setExecuting] = useState(false);
   const [executed, setExecuted] = useState(false);
 
   function handleExecute() {
-    setExecuting(true);
-    setTimeout(() => {
-      setExecuting(false);
-      setExecuted(true);
-    }, 900);
+    console.log("Execute confirmed.");
+
+    setExecuted(true);
   }
 
   return (
@@ -38,15 +43,22 @@ export function AssistantMessage({ reply, sql, result = mockResult }: AssistantM
       </div>
       <div className="min-w-0 flex-1 space-y-3">
         <p className="text-[13.5px] leading-relaxed text-foreground">{reply}</p>
-        <SQLCard
-          sql={sql}
-          onExplain={() => setExplained(true)}
-          onExecute={handleExecute}
-          isExplained={explained}
-          isExecuting={executing}
-          isExecuted={executed}
-        />
-        {executed && <ResultTable result={result} />}
+        {sql && (
+          <SQLCard
+            sql={sql}
+            onExplain={() => setExplained(true)}
+            onExecute={handleExecute}
+            isExplained={explained}
+            isExecuting={executing}
+            isExecuted={executed}
+          />
+        )}
+        {result && <ResultTable result={result} />}
+        {analysis?.requiresConfirmation && (
+          <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3 text-sm text-yellow-300">
+            This query modifies data and requires confirmation before execution.
+          </div>
+        )}
       </div>
     </motion.div>
   );

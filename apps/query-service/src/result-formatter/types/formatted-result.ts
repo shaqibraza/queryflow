@@ -1,7 +1,10 @@
 export interface FormattedResult {
-  columns: string[];
+  columns: {
+    key: string;
+    label: string;
+  }[];
 
   rows: Record<string, unknown>[];
 
-  count: number;
+  totalRows: number;
 }

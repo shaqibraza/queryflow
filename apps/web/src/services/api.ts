@@ -4,6 +4,11 @@ import { useAuthStore } from "../stores/auth.store";
 function attachAuth(config: any) {
   const { accessToken, user } = useAuthStore.getState();
 
+  console.log("====== AUTH REQUEST ======");
+  console.log("URL:", config.url);
+  console.log("Access Token:", accessToken);
+  console.log("User:", user);
+
   if (accessToken) {
     config.headers.set("Authorization", `Bearer ${accessToken}`);
   }
