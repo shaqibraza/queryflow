@@ -1,8 +1,52 @@
 import axios, { AxiosInstance } from "axios";
 import { env } from "../config/env.js";
 
+interface Conversation {
+  id: string;
+  userId: string;
+  connectionId: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Message {
+  id: string;
+  conversationId: string;
+  role: "USER" | "ASSISTANT";
+  question: string | null;
+  reply: string | null;
+  generatedQuery: string | null;
+  analysis: unknown;
+  result: unknown;
+  createdAt: string;
+}
+
+export interface CreateConversationRequest {
+  connectionId: string;
+  firstQuestion: string;
+}
+
+export interface SaveUserMessageRequest {
+  question: string;
+}
+
+export interface SaveAssistantMessageRequest {
+  reply: string;
+  generatedQuery?: string;
+  analysis?: unknown;
+  result?: unknown;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
 export class ConversationClient {
   private readonly client: AxiosInstance;
+
   constructor() {
     this.client = axios.create({
       baseURL: env.CONVERSATION_SERVICE_URL,
@@ -10,13 +54,17 @@ export class ConversationClient {
     });
   }
 
-  async createConversation(connectionId: string, firstQuestion: string, userId: string) {
-    const response = await this.client.post(
+  async createConversation(
+    connectionId: string,
+    firstQuestion: string,
+    userId: string
+  ): Promise<Conversation> {
+    const { data } = await this.client.post<ApiResponse<Conversation>>(
       "/conversations",
       {
         connectionId,
         firstQuestion
-      },
+      } satisfies CreateConversationRequest,
       {
         headers: {
           "X-User-Id": userId
@@ -24,45 +72,57 @@ export class ConversationClient {
       }
     );
 
-    return response.data.data;
+    return data.data;
   }
 
-  async saveUserMessage(conversationId: string, question: string, userId: string) {
-    const response = await this.client.post(
+  async saveUserMessage(
+    conversationId: string,
+    question: string,
+    userId: string
+  ): Promise<Message> {
+    const { data } = await this.client.post<ApiResponse<Message>>(
       `/conversations/${conversationId}/messages/user`,
-      { question },
-      { headers: { "X-User-Id": userId } }
+      {
+        question
+      } satisfies SaveUserMessageRequest,
+      {
+        headers: {
+          "X-User-Id": userId
+        }
+      }
     );
 
-    return response.data.data;
+    return data.data;
   }
 
   async saveAssistantMessage(
     conversationId: string,
-    payload: {
-      reply: string;
-      generatedQuery?: string;
-      analysis?: unknown;
-      result?: unknown;
-    },
+    payload: SaveAssistantMessageRequest,
     userId: string
-  ) {
-    const response = await this.client.post(
+  ): Promise<Message> {
+    const { data } = await this.client.post<ApiResponse<Message>>(
       `/conversations/${conversationId}/messages/assistant`,
       payload,
-      { headers: { "X-User-Id": userId } }
+      {
+        headers: {
+          "X-User-Id": userId
+        }
+      }
     );
 
-    return response.data.data;
+    return data.data;
   }
 
-  async getMessages(conversationId: string, userId: string) {
-    const response = await this.client.get(`/conversations/${conversationId}/messages`, {
-      headers: {
-        "X-User-Id": userId
+  async getMessages(conversationId: string, userId: string): Promise<Message[]> {
+    const { data } = await this.client.get<ApiResponse<Message[]>>(
+      `/conversations/${conversationId}/messages`,
+      {
+        headers: {
+          "X-User-Id": userId
+        }
       }
-    });
+    );
 
-    return response.data.data;
+    return data.data;
   }
 }
