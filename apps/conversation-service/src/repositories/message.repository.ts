@@ -17,7 +17,7 @@ export class MessageRepository {
     conversationId: string,
     data: {
       reply: string;
-      generatedQuery: string;
+      generatedQuery?: string;
       analysis?: unknown;
       result?: unknown;
     }

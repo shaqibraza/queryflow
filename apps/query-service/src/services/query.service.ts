@@ -7,12 +7,14 @@ import { ExecutorFactory } from "../executors/executor.factory.js";
 import { ConnectionClient } from "../clients/connection.client.js";
 import { ResponseParserFactory } from "../parser/response-parser.factory.js";
 import { ResultFormatterFactory } from "../result-formatter/result-formatter.factory.js";
+import { ConversationClient } from "../clients/conversation.client.js";
 
 export class QueryService {
   constructor(
     private readonly metadataService: MetadataService,
     private readonly geminiClient: GeminiClient,
-    private readonly connectionClient: ConnectionClient
+    private readonly connectionClient: ConnectionClient,
+    private readonly conversationClient: ConversationClient
   ) {}
 
   async processQuery(connectionId: string, question: string, userId: string) {

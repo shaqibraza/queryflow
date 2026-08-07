@@ -19,5 +19,8 @@ router.get("/", conversationController.list);
 router.get("/:id/messages", conversationController.getMessage);
 router.patch("/:id", conversationController.rename);
 router.delete("/:id", conversationController.delete);
+router.post("/:id/messages/user", conversationController.saveUserMessage);
+
+router.post("/:id/messages/assistant", conversationController.saveAssistantMessage);
 
 export default router;

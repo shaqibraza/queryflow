@@ -57,6 +57,27 @@ export class ConversationService {
     return this.messageRepository.findByConversation(conversationId);
   }
 
+  async saveUserMessage(conversationId: string, userId: string, question: string) {
+    await this.getConversation(conversationId, userId);
+
+    return this.messageRepository.createUserMessage(conversationId, question);
+  }
+
+  async saveAssistantMessage(
+    conversationId: string,
+    userId: string,
+    data: {
+      reply: string;
+      generatedQuery?: string;
+      analysis?: unknown;
+      result?: unknown;
+    }
+  ) {
+    await this.getConversation(conversationId, userId);
+
+    return this.messageRepository.createAssistantMessage(conversationId, data);
+  }
+
   private generateTitle(question: string) {
     const normalized = question.trim().replace(/\s+/g, " ");
 
