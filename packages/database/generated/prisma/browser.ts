@@ -31,3 +31,13 @@ export type RefreshToken = Prisma.RefreshTokenModel;
  *
  */
 export type DatabaseConnection = Prisma.DatabaseConnectionModel;
+/**
+ * Model Conversation
+ *
+ */
+export type Conversation = Prisma.ConversationModel;
+/**
+ * Model Message
+ *
+ */
+export type Message = Prisma.MessageModel;

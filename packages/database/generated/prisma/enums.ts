@@ -15,3 +15,10 @@ export const DatabaseType = {
 } as const;
 
 export type DatabaseType = (typeof DatabaseType)[keyof typeof DatabaseType];
+
+export const MessageRole = {
+  USER: "USER",
+  ASSISTANT: "ASSISTANT"
+} as const;
+
+export type MessageRole = (typeof MessageRole)[keyof typeof MessageRole];

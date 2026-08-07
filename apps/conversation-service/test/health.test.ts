@@ -7,7 +7,7 @@ describe("GET /health", () => {
     const response = await request(createApp()).get("/health").expect(200);
 
     expect(response.body).toMatchObject({
-      service: "ai-orchestrator",
+      service: "conversation-service",
       status: "ok"
     });
   });

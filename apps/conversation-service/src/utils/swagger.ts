@@ -5,7 +5,7 @@ const options: Options = {
   definition: {
     openapi: "3.1.0",
     info: {
-      title: "QueryFlow AI Orchestrator API",
+      title: "QueryFlow Conversation Service API",
       version: "0.1.0"
     }
   },

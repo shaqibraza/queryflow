@@ -57,3 +57,53 @@ model DatabaseConnection {
 
   @@index([ownerId])
 }
+
+
+model Conversation {
+  id           String    @id @default(cuid())
+
+  userId       String
+
+  connectionId String
+
+  title        String
+
+  messages     Message[]
+
+  createdAt    DateTime  @default(now())
+
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([connectionId])
+}
+
+
+model Message {
+  id             String   @id @default(cuid())
+
+  conversationId String
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role           MessageRole
+
+  question       String?
+
+  reply          String?
+
+  generatedQuery String?
+
+  analysis       Json?
+
+  result         Json?
+
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}

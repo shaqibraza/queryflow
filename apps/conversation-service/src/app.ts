@@ -7,9 +7,11 @@ import { createHealthRouter } from "./routes/health.routes.js";
 import { HealthService } from "./services/health.service.js";
 import { swaggerSpec } from "./utils/swagger.js";
 
+import conversationRoutes from "./routes/conversation.routes.js";
+
 export const createApp = (): express.Express => {
   const app = express();
-  const healthService = new HealthService("ai-orchestrator");
+  const healthService = new HealthService("conversation-service");
   const healthController = new HealthController(healthService);
 
   app.use(express.json());
@@ -17,6 +19,8 @@ export const createApp = (): express.Express => {
   app.use(createHealthRouter(healthController));
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   app.use(errorHandler);
+
+  app.use("/conversations", conversationRoutes);
 
   return app;
 };
