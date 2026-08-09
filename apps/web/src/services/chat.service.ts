@@ -1,21 +1,29 @@
 import { queryApi } from "./api";
 
+export interface ChatAnalysis {
+  type: string;
+  requiresConfirmation: boolean;
+  firstKeyword: string;
+}
+
 export interface ChatResponse {
+  conversationId: string;
   generatedQuery: string | null;
-  analysis: {
-    type: string;
-    requiresConfirmation: boolean;
-    firstKeyword: string;
-  };
+  analysis: ChatAnalysis;
   result?: unknown;
   message?: string;
 }
 
 export class ChatService {
-  static async query(connectionId: string, question: string) {
+  static async query(
+    connectionId: string,
+    question: string,
+    conversationId?: string
+  ): Promise<ChatResponse> {
     const { data } = await queryApi.post("/query", {
       connectionId,
-      question
+      question,
+      conversationId
     });
 
     return data.data as ChatResponse;

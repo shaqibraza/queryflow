@@ -6,6 +6,7 @@ export class MongoDbResultFormatter implements ResultFormatter<Record<string, un
     const firstRow = rows[0] ?? {};
 
     return {
+      type: "READ",
       columns: Object.keys(firstRow).map((key) => ({
         key,
         label: this.formatLabel(key)

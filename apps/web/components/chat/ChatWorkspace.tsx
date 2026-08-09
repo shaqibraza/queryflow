@@ -2,17 +2,22 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+
 import { type Suggestion } from "@/lib/mock-data";
+
 import { AssistantMessage } from "./AssistantMessage";
 import { ChatInput } from "./ChatInput";
 import { TypingIndicator } from "./TypingIndicator";
 import { UserMessage } from "./UserMessage";
 import { WelcomeScreen } from "./WelcomeScreen";
+
 import type { DatabaseConnection } from "@/components/connection/ConnectionSelector";
+
 import { ChatService } from "@/src/services/chat.service";
 
 interface Message {
   id: string;
+
   role: "user" | "assistant";
 
   content: string;
@@ -21,7 +26,7 @@ interface Message {
 
   sql?: string;
 
-  result?: any;
+  result?: unknown;
 
   analysis?: {
     type: string;
@@ -30,7 +35,7 @@ interface Message {
   };
 }
 
-function nextId() {
+function nextId(): string {
   return crypto.randomUUID();
 }
 
@@ -40,21 +45,29 @@ interface ChatWorkspaceProps {
 
 export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
+
   const [isTyping, setIsTyping] = useState(false);
+
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    setConversationId(undefined);
+    setMessages([]);
+  }, [selectedConnection?.id]);
 
   useEffect(() => {
     console.group("Messages State");
 
     console.table(
-      messages.map((m, index) => ({
+      messages.map((message, index) => ({
         index,
-        id: m.id,
-        role: m.role,
-        content: m.content
+        id: message.id,
+        role: message.role,
+        content: message.content
       }))
     );
 
-    const ids = messages.map((m) => m.id);
+    const ids = messages.map((message) => message.id);
 
     const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
 
@@ -67,13 +80,21 @@ export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
 
   async function sendMessage(content: string) {
     if (!selectedConnection) {
+      console.warn("Cannot send message: no database connection selected.");
+
+      return;
+    }
+
+    const trimmedContent = content.trim();
+
+    if (!trimmedContent) {
       return;
     }
 
     const userMessage: Message = {
       id: nextId(),
       role: "user",
-      content
+      content: trimmedContent
     };
 
     console.log("User Message:", userMessage);
@@ -89,14 +110,33 @@ export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
     setIsTyping(true);
 
     try {
-      console.log("Sending question:", content);
+      console.group("Chat Request");
 
-      const response = await ChatService.query(selectedConnection.id, content);
+      console.log("Connection ID:", selectedConnection.id);
+
+      console.log("Conversation ID:", conversationId ?? "NEW");
+
+      console.log("Question:", trimmedContent);
+
+      const response = await ChatService.query(
+        selectedConnection.id,
+        trimmedContent,
+        conversationId
+      );
 
       console.log("Backend Response:", response);
 
+      console.groupEnd();
+
+      if (response.conversationId) {
+        setConversationId(response.conversationId);
+
+        console.log("Conversation ID:", response.conversationId);
+      }
+
       const assistantMessage: Message = {
         id: nextId(),
+
         role: "assistant",
 
         connectionId: selectedConnection.id,
@@ -119,42 +159,15 @@ export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
 
         return updated;
       });
-
-      async function executeQuery(messageId: string) {
-        const message = messages.find((m) => m.id === messageId);
-
-        if (!message?.sql || !message.connectionId) {
-          return;
-        }
-
-        try {
-          console.log("Executing Query:", message.sql);
-
-          const response = await ChatService.execute(message.connectionId, message.sql);
-
-          console.log("Execution Response:", response);
-
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === messageId
-                ? {
-                    ...msg,
-                    result: response.result
-                  }
-                : msg
-            )
-          );
-        } catch (error) {
-          console.error("Execution Failed", error);
-        }
-      }
     } catch (error) {
-      console.error(error);
+      console.error("Failed to process chat request:", error);
 
       const errorMessage: Message = {
         id: nextId(),
+
         role: "assistant",
-        content: "Something went wrong."
+
+        content: "Something went wrong while processing your request."
       };
 
       console.log("Error Message:", errorMessage);
@@ -172,7 +185,7 @@ export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
   }
 
   function handleSuggestion(suggestion: Suggestion) {
-    sendMessage(suggestion.label);
+    void sendMessage(suggestion.label);
   }
 
   const hasMessages = messages.length > 0;
@@ -203,6 +216,8 @@ export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
                       try {
                         console.log("Executing Query:", message.sql);
 
+                        console.log("Connection ID:", message.connectionId);
+
                         const response = await ChatService.execute(
                           message.connectionId,
                           message.sql
@@ -211,17 +226,17 @@ export function ChatWorkspace({ selectedConnection }: ChatWorkspaceProps) {
                         console.log("Execution Response:", response);
 
                         setMessages((prev) =>
-                          prev.map((m) =>
-                            m.id === message.id
+                          prev.map((currentMessage) =>
+                            currentMessage.id === message.id
                               ? {
-                                  ...m,
+                                  ...currentMessage,
                                   result: response.result
                                 }
-                              : m
+                              : currentMessage
                           )
                         );
                       } catch (error) {
-                        console.error("Execution Failed", error);
+                        console.error("Execution Failed:", error);
                       }
                     }}
                   />

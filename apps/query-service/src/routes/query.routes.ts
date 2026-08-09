@@ -32,4 +32,8 @@ router.post("/", queryController.query);
 
 router.post("/execute", queryController.execute);
 
+router.get("/conversations", queryController.getConversations);
+
+router.get("/conversations/:id/messages", queryController.getConversationMessages);
+
 export default router;

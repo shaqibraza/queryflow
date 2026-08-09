@@ -113,6 +113,16 @@ export class ConversationClient {
     return data.data;
   }
 
+  async getConversations(userId: string): Promise<Conversation[]> {
+    const { data } = await this.client.get<ApiResponse<Conversation[]>>("/conversations", {
+      headers: {
+        "X-User-Id": userId
+      }
+    });
+
+    return data.data;
+  }
+
   async getMessages(conversationId: string, userId: string): Promise<Message[]> {
     const { data } = await this.client.get<ApiResponse<Message[]>>(
       `/conversations/${conversationId}/messages`,

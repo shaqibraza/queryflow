@@ -42,14 +42,15 @@ export class QueryService {
     // Load connection
     const connection = await this.metadataService.getConnection(connectionId, userId);
 
-    // Collect metadata
+    // Collect complete metadata
     const metadata = MetadataSanitizer.sanitize(
       await this.metadataService.collectMetadata(connectionId, userId)
     );
 
-    // Build AI prompt
+    // Select prompt builder
     const promptBuilder = PromptBuilderFactory.create(connection.databaseType);
 
+    // Build prompt
     const prompt = promptBuilder.build({
       question,
       metadata
@@ -163,5 +164,13 @@ export class QueryService {
     return {
       result: formattedResult
     };
+  }
+
+  async getConversations(userId: string) {
+    return this.conversationClient.getConversations(userId);
+  }
+
+  async getConversationMessages(conversationId: string, userId: string) {
+    return this.conversationClient.getMessages(conversationId, userId);
   }
 }

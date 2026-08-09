@@ -18,7 +18,12 @@ export class QueryController {
         });
       }
 
-      const result = await this.queryService.processQuery(body.connectionId, body.question, userId);
+      const result = await this.queryService.processQuery(
+        body.connectionId,
+        body.question,
+        userId,
+        body.conversationId
+      );
 
       return res.status(200).json({
         success: true,
@@ -47,6 +52,56 @@ export class QueryController {
       return res.status(200).json({
         success: true,
         data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getConversations = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.header("x-user-id");
+      if (!userId || typeof userId !== "string") {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized"
+        });
+      }
+
+      const conversations = await this.queryService.getConversations(userId);
+
+      return res.status(200).json({
+        success: true,
+        data: conversations
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getConversationMessages = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const conversationId = req.params.id;
+      if (!conversationId || typeof conversationId !== "string") {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Conversation ID"
+        });
+      }
+
+      const userId = req.header("x-user-id");
+      if (!userId || typeof userId !== "string") {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized"
+        });
+      }
+
+      const messages = await this.queryService.getConversationMessages(conversationId, userId);
+
+      return res.status(200).json({
+        success: true,
+        data: messages
       });
     } catch (error) {
       next(error);

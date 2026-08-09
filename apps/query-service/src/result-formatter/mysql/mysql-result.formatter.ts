@@ -6,6 +6,7 @@ export class MysqlResultFormatter implements ResultFormatter<Record<string, unkn
     const firstRow = rows[0] ?? {};
 
     return {
+      type: "READ",
       columns: Object.keys(firstRow).map((key) => ({
         key,
         label: this.formatLabel(key)
