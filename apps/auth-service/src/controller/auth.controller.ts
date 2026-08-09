@@ -6,15 +6,22 @@ import { hashRefreshToken } from "../utils/refresh-token.js";
 import jwt from "jsonwebtoken";
 import { findMatchingRefreshToken } from "../utils/find-refresh-token.js";
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from "../utils/cookies.js";
+import {
+  generateVerificationOtp,
+  hashVerificationOtp,
+  verifyVerificationOtp
+} from "../utils/verification-otp.js";
+import { sendVerificationEmail } from "../utils/mailer.js";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
-    // 1. Check if user exists
+    // 1. Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
+
     if (existingUser) {
       return res.status(409).json({
         success: false,
@@ -25,46 +32,51 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     // 2. Hash password
     const passwordHash = await hashPassword(password);
 
-    // 3. Create user
+    // 3. Generate 6-digit OTP
+    const verificationOtp = generateVerificationOtp();
+
+    // 4. Hash OTP before storing it
+    const hashedVerificationOtp = await hashVerificationOtp(verificationOtp);
+
+    // 5. OTP expires after 10 minutes
+    const verificationOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    // 6. Create user
     const user = await prisma.user.create({
       data: {
         firstName,
         lastName,
         email,
-        passwordHash
+        passwordHash,
+        emailVerified: false,
+        verificationOtp: hashedVerificationOtp,
+        verificationOtpExpiry
       }
     });
 
-    // 4. Generate access & refresh tokens
-    const accessToken = generateAccessToken({
-      userId: user.id,
-      email: user.email
-    });
+    // 7. Send verification email
+    try {
+      await sendVerificationEmail(user.email, verificationOtp);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
 
-    const refreshToken = generateRefreshToken({
-      userId: user.id,
-      email: user.email,
-      rememberMe: false
-    });
+      // Remove the newly created user if email failed
+      await prisma.user.delete({
+        where: {
+          id: user.id
+        }
+      });
 
-    // 5. Save refresh token
-    const hashedRefreshToken = await hashRefreshToken(refreshToken);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to send verification email. Please try again."
+      });
+    }
 
-    await prisma.refreshToken.create({
-      data: {
-        tokenHash: hashedRefreshToken,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        userId: user.id
-      }
-    });
-
-    // set cookies
-    setRefreshTokenCookie(res, refreshToken, false);
-
-    // 6. return response
+    // 8. Do NOT issue access/refresh tokens here
     return res.status(201).json({
       success: true,
-      message: "User registerd successfully",
+      message: "Registration successful. Please verify your email.",
       data: {
         user: {
           id: user.id,
@@ -73,11 +85,83 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
           email: user.email,
           avatar: user.avatar,
           emailVerified: user.emailVerified
-        },
-        accessToken
+        }
       }
     });
-  } catch (error: any) {
+  } catch (error) {
+    console.error("Registration error:", error);
+
+    next(error);
+  }
+};
+
+export const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email, otp } = req.body;
+
+    // 1. Find user
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // 2. Already verified
+    if (user.emailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is already verified"
+      });
+    }
+
+    // 3. Make sure OTP exists
+    if (!user.verificationOtp || !user.verificationOtpExpiry) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification OTP not found"
+      });
+    }
+
+    // 4. Check OTP expiry
+    if (new Date() > user.verificationOtpExpiry) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification OTP has expired"
+      });
+    }
+
+    // 5. Compare entered OTP with hashed OTP
+    const isValidOtp = await verifyVerificationOtp(otp, user.verificationOtp);
+
+    if (!isValidOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification OTP"
+      });
+    }
+
+    // 6. Verify email and invalidate OTP
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        verificationOtp: null,
+        verificationOtpExpiry: null
+      }
+    });
+
+    // 7. Success
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully"
+    });
+  } catch (error) {
+    console.error("Email verification error:", error);
+
     next(error);
   }
 };

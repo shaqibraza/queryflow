@@ -31,6 +31,8 @@ export type UserMinAggregateOutputType = {
   passwordHash: string | null;
   avatar: string | null;
   emailVerified: boolean | null;
+  verificationOtp: string | null;
+  verificationOtpExpiry: Date | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
@@ -43,6 +45,8 @@ export type UserMaxAggregateOutputType = {
   passwordHash: string | null;
   avatar: string | null;
   emailVerified: boolean | null;
+  verificationOtp: string | null;
+  verificationOtpExpiry: Date | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 };
@@ -55,6 +59,8 @@ export type UserCountAggregateOutputType = {
   passwordHash: number;
   avatar: number;
   emailVerified: number;
+  verificationOtp: number;
+  verificationOtpExpiry: number;
   createdAt: number;
   updatedAt: number;
   _all: number;
@@ -68,6 +74,8 @@ export type UserMinAggregateInputType = {
   passwordHash?: true;
   avatar?: true;
   emailVerified?: true;
+  verificationOtp?: true;
+  verificationOtpExpiry?: true;
   createdAt?: true;
   updatedAt?: true;
 };
@@ -80,6 +88,8 @@ export type UserMaxAggregateInputType = {
   passwordHash?: true;
   avatar?: true;
   emailVerified?: true;
+  verificationOtp?: true;
+  verificationOtpExpiry?: true;
   createdAt?: true;
   updatedAt?: true;
 };
@@ -92,6 +102,8 @@ export type UserCountAggregateInputType = {
   passwordHash?: true;
   avatar?: true;
   emailVerified?: true;
+  verificationOtp?: true;
+  verificationOtpExpiry?: true;
   createdAt?: true;
   updatedAt?: true;
   _all?: true;
@@ -178,6 +190,8 @@ export type UserGroupByOutputType = {
   passwordHash: string;
   avatar: string | null;
   emailVerified: boolean;
+  verificationOtp: string | null;
+  verificationOtpExpiry: Date | null;
   createdAt: Date;
   updatedAt: Date;
   _count: UserCountAggregateOutputType | null;
@@ -208,6 +222,8 @@ export type UserWhereInput = {
   passwordHash?: Prisma.StringFilter<"User"> | string;
   avatar?: Prisma.StringNullableFilter<"User"> | string | null;
   emailVerified?: Prisma.BoolFilter<"User"> | boolean;
+  verificationOtp?: Prisma.StringNullableFilter<"User"> | string | null;
+  verificationOtpExpiry?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
   refreshTokens?: Prisma.RefreshTokenListRelationFilter;
@@ -221,6 +237,8 @@ export type UserOrderByWithRelationInput = {
   passwordHash?: Prisma.SortOrder;
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder;
   emailVerified?: Prisma.SortOrder;
+  verificationOtp?: Prisma.SortOrderInput | Prisma.SortOrder;
+  verificationOtpExpiry?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
   refreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput;
@@ -238,6 +256,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<
     passwordHash?: Prisma.StringFilter<"User"> | string;
     avatar?: Prisma.StringNullableFilter<"User"> | string | null;
     emailVerified?: Prisma.BoolFilter<"User"> | boolean;
+    verificationOtp?: Prisma.StringNullableFilter<"User"> | string | null;
+    verificationOtpExpiry?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
     createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     refreshTokens?: Prisma.RefreshTokenListRelationFilter;
@@ -253,6 +273,8 @@ export type UserOrderByWithAggregationInput = {
   passwordHash?: Prisma.SortOrder;
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder;
   emailVerified?: Prisma.SortOrder;
+  verificationOtp?: Prisma.SortOrderInput | Prisma.SortOrder;
+  verificationOtpExpiry?: Prisma.SortOrderInput | Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
   _count?: Prisma.UserCountOrderByAggregateInput;
@@ -271,6 +293,9 @@ export type UserScalarWhereWithAggregatesInput = {
   passwordHash?: Prisma.StringWithAggregatesFilter<"User"> | string;
   avatar?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
   emailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean;
+  verificationOtp?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
+  verificationOtpExpiry?:
+    Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null;
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string;
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string;
 };
@@ -283,6 +308,8 @@ export type UserCreateInput = {
   passwordHash: string;
   avatar?: string | null;
   emailVerified?: boolean;
+  verificationOtp?: string | null;
+  verificationOtpExpiry?: Date | string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput;
@@ -296,6 +323,8 @@ export type UserUncheckedCreateInput = {
   passwordHash: string;
   avatar?: string | null;
   emailVerified?: boolean;
+  verificationOtp?: string | null;
+  verificationOtpExpiry?: Date | string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput;
@@ -309,6 +338,8 @@ export type UserUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string;
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  verificationOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  verificationOtpExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput;
@@ -322,6 +353,8 @@ export type UserUncheckedUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string;
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  verificationOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  verificationOtpExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput;
@@ -335,6 +368,8 @@ export type UserCreateManyInput = {
   passwordHash: string;
   avatar?: string | null;
   emailVerified?: boolean;
+  verificationOtp?: string | null;
+  verificationOtpExpiry?: Date | string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 };
@@ -347,6 +382,8 @@ export type UserUpdateManyMutationInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string;
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  verificationOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  verificationOtpExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -359,6 +396,8 @@ export type UserUncheckedUpdateManyInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string;
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  verificationOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  verificationOtpExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -371,6 +410,8 @@ export type UserCountOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder;
   avatar?: Prisma.SortOrder;
   emailVerified?: Prisma.SortOrder;
+  verificationOtp?: Prisma.SortOrder;
+  verificationOtpExpiry?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
 };
@@ -383,6 +424,8 @@ export type UserMaxOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder;
   avatar?: Prisma.SortOrder;
   emailVerified?: Prisma.SortOrder;
+  verificationOtp?: Prisma.SortOrder;
+  verificationOtpExpiry?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
 };
@@ -395,6 +438,8 @@ export type UserMinOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder;
   avatar?: Prisma.SortOrder;
   emailVerified?: Prisma.SortOrder;
+  verificationOtp?: Prisma.SortOrder;
+  verificationOtpExpiry?: Prisma.SortOrder;
   createdAt?: Prisma.SortOrder;
   updatedAt?: Prisma.SortOrder;
 };
@@ -414,6 +459,10 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean;
+};
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null;
 };
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -454,6 +503,8 @@ export type UserCreateWithoutRefreshTokensInput = {
   passwordHash: string;
   avatar?: string | null;
   emailVerified?: boolean;
+  verificationOtp?: string | null;
+  verificationOtpExpiry?: Date | string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 };
@@ -466,6 +517,8 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   passwordHash: string;
   avatar?: string | null;
   emailVerified?: boolean;
+  verificationOtp?: string | null;
+  verificationOtpExpiry?: Date | string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 };
@@ -506,6 +559,8 @@ export type UserUpdateWithoutRefreshTokensInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string;
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  verificationOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  verificationOtpExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -518,6 +573,8 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string;
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  verificationOtp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  verificationOtpExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -568,6 +625,8 @@ export type UserSelect<
     passwordHash?: boolean;
     avatar?: boolean;
     emailVerified?: boolean;
+    verificationOtp?: boolean;
+    verificationOtpExpiry?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
     refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>;
@@ -587,6 +646,8 @@ export type UserSelectCreateManyAndReturn<
     passwordHash?: boolean;
     avatar?: boolean;
     emailVerified?: boolean;
+    verificationOtp?: boolean;
+    verificationOtpExpiry?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
   },
@@ -604,6 +665,8 @@ export type UserSelectUpdateManyAndReturn<
     passwordHash?: boolean;
     avatar?: boolean;
     emailVerified?: boolean;
+    verificationOtp?: boolean;
+    verificationOtpExpiry?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
   },
@@ -618,6 +681,8 @@ export type UserSelectScalar = {
   passwordHash?: boolean;
   avatar?: boolean;
   emailVerified?: boolean;
+  verificationOtp?: boolean;
+  verificationOtpExpiry?: boolean;
   createdAt?: boolean;
   updatedAt?: boolean;
 };
@@ -632,6 +697,8 @@ export type UserOmit<
   | "passwordHash"
   | "avatar"
   | "emailVerified"
+  | "verificationOtp"
+  | "verificationOtpExpiry"
   | "createdAt"
   | "updatedAt",
   ExtArgs["result"]["user"]
@@ -665,6 +732,8 @@ export type $UserPayload<
       passwordHash: string;
       avatar: string | null;
       emailVerified: boolean;
+      verificationOtp: string | null;
+      verificationOtpExpiry: Date | null;
       createdAt: Date;
       updatedAt: Date;
     },
@@ -1226,6 +1295,8 @@ export interface UserFieldRefs {
   readonly passwordHash: Prisma.FieldRef<"User", "String">;
   readonly avatar: Prisma.FieldRef<"User", "String">;
   readonly emailVerified: Prisma.FieldRef<"User", "Boolean">;
+  readonly verificationOtp: Prisma.FieldRef<"User", "String">;
+  readonly verificationOtpExpiry: Prisma.FieldRef<"User", "DateTime">;
   readonly createdAt: Prisma.FieldRef<"User", "DateTime">;
   readonly updatedAt: Prisma.FieldRef<"User", "DateTime">;
 }
