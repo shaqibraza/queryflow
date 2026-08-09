@@ -7,24 +7,22 @@ interface AuthState {
   user: User | null;
   accessToken: string | null;
   isAuthenticated: boolean;
+  hasHydrated: boolean;
 
   login: (user: User, token: string) => void;
-
   logout: () => void;
-
   setUser: (user: User) => void;
-
   setAccessToken: (token: string) => void;
+  setHasHydrated: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-
       accessToken: null,
-
       isAuthenticated: false,
+      hasHydrated: false,
 
       login: (user, token) =>
         set({
@@ -42,22 +40,37 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user) =>
         set({
-          user
+          user,
+          isAuthenticated: true
         }),
 
       setAccessToken: (token) =>
         set({
-          accessToken: token
+          accessToken: token,
+          isAuthenticated: true
+        }),
+
+      setHasHydrated: (value) =>
+        set({
+          hasHydrated: value
         })
     }),
     {
       name: "queryflow-auth",
 
       partialize: (state) => ({
-        user: state.user,
-        accessToken: state.accessToken,
-        isAuthenticated: state.isAuthenticated
-      })
+        user: state.user
+      }),
+
+      onRehydrateStorage: () => {
+        return (state, error) => {
+          if (error) {
+            console.error("Auth hydration failed:", error);
+          }
+
+          state?.setHasHydrated(true);
+        };
+      }
     }
   )
 );

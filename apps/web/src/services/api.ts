@@ -1,7 +1,7 @@
-import axios from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "../stores/auth.store";
 
-function attachAuth(config: any) {
+function attachAuth(config: InternalAxiosRequestConfig) {
   const { accessToken, user } = useAuthStore.getState();
 
   console.log("====== AUTH REQUEST ======");
@@ -50,3 +50,5 @@ export const queryApi = axios.create({
 console.log("QUERY API BASE =", queryApi.defaults.baseURL);
 
 queryApi.interceptors.request.use(attachAuth);
+
+console.log("QUERY API BASE =", queryApi.defaults.baseURL);

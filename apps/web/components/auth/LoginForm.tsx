@@ -40,7 +40,8 @@ export function LoginForm() {
     try {
       const result = (await AuthService.login({
         email: data.email,
-        password: data.password
+        password: data.password,
+        rememberMe
       })) as AuthResponse;
       console.log("LOGIN RESULT", result);
 

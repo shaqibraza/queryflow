@@ -210,50 +210,58 @@ export function ChatWorkspace({
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex-1 overflow-y-auto">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {!hasMessages ? (
-          <WelcomeScreen onSelectSuggestion={handleSuggestion} />
+          <div className="mx-auto flex min-h-full w-full max-w-4xl items-center px-4 py-8 sm:px-6 lg:px-8">
+            <div className="w-full">
+              <WelcomeScreen onSelectSuggestion={handleSuggestion} />
+            </div>
+          </div>
         ) : (
-          <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 py-6">
-            <AnimatePresence initial={false}>
-              {messages.map((message) =>
-                message.role === "user" ? (
-                  <UserMessage key={message.id} content={message.content} />
-                ) : (
-                  <AssistantMessage
-                    key={message.id}
-                    reply={message.content}
-                    sql={message.sql}
-                    result={message.result}
-                    analysis={message.analysis}
-                    onExecute={() => executeMessage(message)}
-                  />
-                )
-              )}
-            </AnimatePresence>
+          <div className="mx-auto w-full max-w-4xl px-3 py-6 sm:px-6 lg:px-8">
+            <div className="space-y-5">
+              <AnimatePresence initial={false}>
+                {messages.map((message) =>
+                  message.role === "user" ? (
+                    <UserMessage key={message.id} content={message.content} />
+                  ) : (
+                    <AssistantMessage
+                      key={message.id}
+                      reply={message.content}
+                      sql={message.sql}
+                      result={message.result}
+                      analysis={message.analysis}
+                      onExecute={() => executeMessage(message)}
+                    />
+                  )
+                )}
 
-            {isTyping && (
-              <motion.div
-                initial={{
-                  opacity: 0
-                }}
-                animate={{
-                  opacity: 1
-                }}
-                exit={{
-                  opacity: 0
-                }}
-                className="flex"
-              >
-                <TypingIndicator />
-              </motion.div>
-            )}
+                {isTyping && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex"
+                  >
+                    <TypingIndicator />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         )}
       </div>
 
-      <ChatInput onSend={sendMessage} disabled={isTyping} />
+      <div className="shrink-0 px-3 pb-3 pt-2 sm:px-6 sm:pb-4 lg:px-8">
+        <div className="mx-auto w-full max-w-4xl">
+          <ChatInput onSend={sendMessage} disabled={isTyping} />
+
+          <p className="mt-2 hidden text-center text-[11px] text-muted/60 sm:block">
+            Press Enter to send · Shift + Enter for a new line
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

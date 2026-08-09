@@ -43,7 +43,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     const refreshToken = generateRefreshToken({
       userId: user.id,
-      email: user.email
+      email: user.email,
+      rememberMe: false
     });
 
     // 5. Save refresh token
@@ -58,7 +59,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     });
 
     // set cookies
-    setRefreshTokenCookie(res, refreshToken);
+    setRefreshTokenCookie(res, refreshToken, false);
 
     // 6. return response
     return res.status(201).json({
@@ -83,7 +84,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
 
     // 1. Find user
     const user = await prisma.user.findUnique({
@@ -113,7 +114,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     const refreshToken = generateRefreshToken({
       userId: user.id,
-      email: user.email
+      email: user.email,
+      rememberMe
     });
 
     // 4. Save refresh token
@@ -134,7 +136,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     });
 
     // set cookies
-    setRefreshTokenCookie(res, refreshToken);
+    setRefreshTokenCookie(res, refreshToken, rememberMe);
 
     // send response
     return res.status(200).json({
@@ -258,8 +260,9 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
     });
 
     const newRefreshToken = generateRefreshToken({
-      userId: user.id,
-      email: user.email
+      userId: payload.userId,
+      email: payload.email,
+      rememberMe: payload.rememberMe
     });
 
     const hashedRefreshToken = await hashRefreshToken(newRefreshToken);
@@ -273,7 +276,7 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
     });
 
     // Set new HttpOnly Cookie
-    setRefreshTokenCookie(res, newRefreshToken);
+    setRefreshTokenCookie(res, newRefreshToken, payload.rememberMe);
 
     return res.status(200).json({
       success: true,

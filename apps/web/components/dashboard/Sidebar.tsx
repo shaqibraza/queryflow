@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Database, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -9,8 +9,9 @@ import { UserProfileCard } from "@/components/profile/UserProfileCard";
 import { SidebarItem } from "./SidebarItem";
 import { useAuthStore } from "@/src/stores/auth.store";
 import { useRouter } from "next/navigation";
-import { AuthService } from "@/src/services/auth.service";
 import { Conversation, ConversationService } from "@/src/services/conversation.service";
+import { AuthService } from "@/src/services/auth.service";
+import Link from "next/link";
 
 interface SidebarProps {
   open: boolean;
@@ -40,76 +41,102 @@ export function Sidebar({
 
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
 
-  async function loadConversations() {
-    try {
-      setIsLoadingConversations(true);
-
-      const data = await ConversationService.getConversations();
-
-      setConversations(data);
-    } catch (error) {
-      console.error("Failed to load conversations:", error);
-
-      setConversations([]);
-    } finally {
-      setIsLoadingConversations(false);
-    }
-  }
-
   useEffect(() => {
+    let cancelled = false;
+
     const loadConversations = async () => {
       try {
         setIsLoadingConversations(true);
 
         const data = await ConversationService.getConversations();
 
-        setConversations(data);
+        if (!cancelled) {
+          setConversations(data);
+        }
       } catch (error) {
-        console.error("Failed to load conversations:", error);
+        if (!cancelled) {
+          console.error("Failed to load conversations:", error);
 
-        setConversations([]);
+          setConversations([]);
+        }
       } finally {
-        setIsLoadingConversations(false);
+        if (!cancelled) {
+          setIsLoadingConversations(false);
+        }
       }
     };
 
     void loadConversations();
+
+    return () => {
+      cancelled = true;
+    };
   }, [conversationRefreshKey]);
 
   async function handleLogout() {
     try {
       await AuthService.logout();
     } catch (error) {
-      console.error(error);
+      console.error("Logout failed:", error);
     } finally {
       logout();
       router.replace("/login");
     }
   }
 
+  function handleConversationSelect(id: string) {
+    onSelectConversation(id);
+
+    // Close drawer after selecting a conversation
+    // on mobile/tablet. On desktop this has no effect.
+    onClose();
+  }
+
+  function handleNewChat() {
+    onNewChat();
+
+    // Close drawer after starting a new chat.
+    onClose();
+  }
+
   return (
     <>
-      {open && (
-        <button
-          type="button"
-          aria-label="Close sidebar"
-          onClick={onClose}
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-        />
-      )}
+      {/* Mobile / Tablet overlay */}
+      <AnimatePresence>
+        {open && (
+          <motion.button
+            type="button"
+            aria-label="Close navigation"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-[2px] lg:hidden"
+          />
+        )}
+      </AnimatePresence>
 
+      {/* Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ x: 0 }}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[264px] shrink-0 flex-col border-r border-border bg-[#0a0a0d]/95 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-[264px] shrink-0 flex-col",
+          "border-r border-border bg-[#0a0a0d]/95 backdrop-blur-xl",
+          "transition-transform duration-300 ease-in-out",
           open ? "translate-x-0" : "-translate-x-full",
+          "lg:static lg:translate-x-0",
           className
         )}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-5">
-          <div className="flex items-center gap-2">
+          <Link
+            href="/"
+            onClick={onClose}
+            className="flex items-center gap-2 rounded-lg focus-ring"
+            aria-label="Go to QueryFlow home"
+          >
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-accent-deep">
               <Database size={14} className="text-white" />
             </div>
@@ -117,13 +144,14 @@ export function Sidebar({
             <span className="text-[14.5px] font-semibold tracking-tight text-foreground">
               QueryFlow
             </span>
-          </div>
+          </Link>
 
+          {/* Mobile / Tablet close button */}
           <button
             type="button"
             onClick={onClose}
             suppressHydrationWarning
-            className="focus-ring rounded-lg p-1.5 text-muted hover:text-foreground lg:hidden"
+            className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-white/[0.05] hover:text-foreground lg:hidden"
             aria-label="Close sidebar"
           >
             <X size={16} />
@@ -134,7 +162,7 @@ export function Sidebar({
         <div className="px-3 pt-5">
           <motion.button
             type="button"
-            onClick={onNewChat}
+            onClick={handleNewChat}
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.98 }}
             suppressHydrationWarning
@@ -163,7 +191,7 @@ export function Sidebar({
                   label={conversation.title}
                   meta={formatConversationDate(conversation.updatedAt)}
                   active={conversation.id === activeConversationId}
-                  onClick={() => onSelectConversation(conversation.id)}
+                  onClick={() => handleConversationSelect(conversation.id)}
                 />
               ))
             )}

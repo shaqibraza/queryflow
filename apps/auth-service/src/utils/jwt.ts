@@ -5,6 +5,10 @@ type JwtPayload = {
   email: string;
 };
 
+type RefreshTokenPayload = JwtPayload & {
+  rememberMe: boolean;
+};
+
 const getJwtSecret = (): string => {
   const secret = process.env.JWT_SECRET;
 
@@ -16,11 +20,15 @@ const getJwtSecret = (): string => {
 };
 
 export const generateAccessToken = (payload: JwtPayload) => {
-  return jwt.sign(payload, getJwtSecret(), { expiresIn: "15m" });
+  return jwt.sign(payload, getJwtSecret(), {
+    expiresIn: "15m"
+  });
 };
 
-export const generateRefreshToken = (payload: JwtPayload) => {
-  return jwt.sign(payload, getJwtSecret(), { expiresIn: "30d" });
+export const generateRefreshToken = (payload: RefreshTokenPayload) => {
+  return jwt.sign(payload, getJwtSecret(), {
+    expiresIn: "30d"
+  });
 };
 
 export const verifyAccessToken = (token: string) => {
@@ -28,5 +36,5 @@ export const verifyAccessToken = (token: string) => {
 };
 
 export const verifyRefreshToken = (token: string) => {
-  return jwt.verify(token, getJwtSecret()) as JwtPayload;
+  return jwt.verify(token, getJwtSecret()) as RefreshTokenPayload;
 };

@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { IconDatabase, IconMenu2, IconX } from "@tabler/icons-react";
 import BorderBeam from "../ui/border-beam";
+import { useRouter } from "next/navigation";
+import { ChevronDown, LogOut, UserRound } from "lucide-react";
+
+import { useAuthStore } from "@/src/stores/auth.store";
+import { AuthService } from "@/src/services/auth.service";
 
 const navigation = [
   {
@@ -27,6 +32,64 @@ const navigation = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const router = useRouter();
+
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  console.log("========== NAVBAR AUTH ==========");
+  console.log("user:", user);
+  console.log("isAuthenticated:", isAuthenticated);
+  console.log("hasHydrated:", hasHydrated);
+  console.log("=================================");
+
+  useEffect(() => {
+    console.log("========== NAVBAR AUTH STATE ==========");
+    console.log("user:", user);
+    console.log("isAuthenticated:", isAuthenticated);
+    console.log("hasHydrated:", hasHydrated);
+    console.log("=======================================");
+  }, [user, isAuthenticated, hasHydrated]);
+  const logout = useAuthStore((state) => state.logout);
+
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  const isLoggedIn = hasHydrated && (isAuthenticated || !!user);
+
+  console.log("NAVBAR isLoggedIn:", isLoggedIn);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  async function handleLogout() {
+    try {
+      await AuthService.logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      logout();
+      setProfileOpen(false);
+      setOpen(false);
+      router.push("/");
+    }
+  }
+
+  const initials = user
+    ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase()
+    : "";
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
@@ -70,28 +133,92 @@ export function Navbar() {
           {/* Actions — desktop only */}
 
           <div className="hidden items-center gap-3 md:flex">
-            <Link
-              href="/login"
-              className="rounded-full px-4 py-2 text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white"
-            >
-              Sign In
-            </Link>
+            {!isLoggedIn ? (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-full px-4 py-2 text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white"
+                >
+                  Sign In
+                </Link>
 
-            <motion.div
-              whileHover={{
-                scale: 1.04
-              }}
-              whileTap={{
-                scale: 0.97
-              }}
-            >
-              <Link
-                href="/register"
-                className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:bg-zinc-200"
-              >
-                Get Started →
-              </Link>
-            </motion.div>
+                <motion.div
+                  whileHover={{
+                    scale: 1.04
+                  }}
+                  whileTap={{
+                    scale: 0.97
+                  }}
+                >
+                  <Link
+                    href="/register"
+                    className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:bg-zinc-200"
+                  >
+                    Get Started →
+                  </Link>
+                </motion.div>
+              </>
+            ) : (
+              <div ref={profileRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen((previous) => !previous)}
+                  className="flex items-center gap-2 rounded-full px-2 py-1.5 text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-[11px] font-semibold text-white">
+                    {initials}
+                  </div>
+
+                  <span>{user?.firstName}</span>
+
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform ${profileOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      initial={{
+                        opacity: 0,
+                        y: -6
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: -6
+                      }}
+                      className="absolute right-0 top-[calc(100%+10px)] z-50 w-52 overflow-hidden rounded-xl border border-white/10 bg-zinc-950/95 p-1.5 shadow-xl backdrop-blur-xl"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          router.push("/profile");
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-zinc-300 transition hover:bg-white/5 hover:text-white"
+                      >
+                        <UserRound size={15} />
+                        Profile
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-red-400 transition hover:bg-red-500/10"
+                      >
+                        <LogOut size={15} />
+                        Log out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
 
           {/* Hamburger — tablet & mobile only */}
@@ -156,21 +283,46 @@ export function Navbar() {
               </div>
 
               <div className="mt-3 flex flex-col gap-2 border-t border-white/10 pt-3">
-                <Link
-                  href="/login"
-                  onClick={() => setOpen(false)}
-                  className="rounded-full px-4 py-2.5 text-center text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white"
-                >
-                  Sign In
-                </Link>
+                {!isLoggedIn ? (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setOpen(false)}
+                      className="rounded-full px-4 py-2.5 text-center text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white"
+                    >
+                      Sign In
+                    </Link>
 
-                <Link
-                  href="/register"
-                  onClick={() => setOpen(false)}
-                  className="rounded-full bg-white px-5 py-2.5 text-center text-sm font-semibold text-black transition hover:bg-zinc-200"
-                >
-                  Get Started →
-                </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setOpen(false)}
+                      className="rounded-full bg-white px-5 py-2.5 text-center text-sm font-semibold text-black transition hover:bg-zinc-200"
+                    >
+                      Get Started →
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpen(false);
+                        router.push("/profile");
+                      }}
+                      className="rounded-full px-4 py-2.5 text-center text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white"
+                    >
+                      Profile
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="rounded-full px-4 py-2.5 text-center text-sm font-medium text-red-400 transition hover:bg-red-500/10"
+                    >
+                      Log out
+                    </button>
+                  </>
+                )}
               </div>
             </motion.div>
           )}

@@ -68,12 +68,12 @@ export function MarketingPanel() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.24 }}
-            className="mt-9 hidden lg:block"
+            className="mt-9 block"
           >
             <QueryPreview />
           </motion.div>
 
-          <div className="mt-9 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <div className="mt-9 grid grid-cols-1 gap-3 ">
             {FEATURES.map((feature, i) => (
               <FeatureCard
                 key={feature.title}

@@ -10,6 +10,7 @@ export interface RegisterPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+  rememberMe: boolean;
 }
 
 export class AuthService {
@@ -40,6 +41,6 @@ export class AuthService {
   static async refresh() {
     const { data } = await authApi.post("/refresh");
 
-    return data;
+    return data.data;
   }
 }

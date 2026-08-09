@@ -1,6 +1,6 @@
 "use client";
 
-import { MetadataService, type DatabaseMetadata } from "@/src/services/metadata.service";
+import { MetadataService } from "@/src/services/metadata.service";
 
 import { useEffect, useState } from "react";
 
@@ -40,6 +40,8 @@ interface DatabaseConnection {
   updatedAt?: string;
 }
 
+const SELECTED_CONNECTION_KEY = "queryflow-selected-connection";
+
 export function DashboardShell() {
   const router = useRouter();
 
@@ -59,9 +61,13 @@ export function DashboardShell() {
 
   const [chatResetKey, setChatResetKey] = useState(0);
 
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const [restoringAuth, setRestoringAuth] = useState(true);
+
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const setUser = useAuthStore((state) => state.setUser);
+
+  const setAccessToken = useAuthStore((state) => state.setAccessToken);
 
   const logout = useAuthStore((state) => state.logout);
 
@@ -73,6 +79,9 @@ export function DashboardShell() {
 
   const setMetadataLoading = useMetadataStore((state) => state.setLoading);
 
+  /*
+   * Load metadata for selected connection.
+   */
   async function loadMetadata(connectionId: string) {
     const cached = getCachedMetadata(connectionId);
 
@@ -95,11 +104,18 @@ export function DashboardShell() {
     }
   }
 
+  /*
+   * Load all database connections and restore
+   * the previously selected connection.
+   */
   async function loadConnections() {
+    console.log("🔥 loadConnections CALLED");
     try {
       setLoadingConnections(true);
 
       const list = await ConnectionService.getConnections();
+
+      console.log("Connections restored:", list);
 
       setConnections(list);
 
@@ -112,14 +128,30 @@ export function DashboardShell() {
           return list[0];
         }
 
-        const exists = list.find((connection) => connection.id === previous.id);
+        const existing = list.find((connection) => connection.id === previous.id);
 
-        return exists ?? list[0];
+        return existing ?? list[0];
       });
 
-      if (list.length > 0) {
-        await loadMetadata(list[0].id);
-      }
+      // Read directly from localStorage.
+      // This avoids React state hydration/race issues.
+      const savedConnectionId = window.localStorage.getItem(SELECTED_CONNECTION_KEY);
+
+      const savedConnection = savedConnectionId
+        ? list.find((connection) => connection.id === savedConnectionId)
+        : undefined;
+
+      // Restore saved DB if it still exists.
+      // Otherwise use the first available DB.
+      const connectionToSelect = savedConnection ?? list[0];
+
+      setSelectedConnection(connectionToSelect);
+
+      // Persist the actual selected connection.
+      window.localStorage.setItem(SELECTED_CONNECTION_KEY, connectionToSelect.id);
+
+      // Load metadata for the restored DB.
+      await loadMetadata(connectionToSelect.id);
     } catch (error) {
       console.error("Failed to load connections:", error);
     } finally {
@@ -127,74 +159,173 @@ export function DashboardShell() {
     }
   }
 
+  /*
+   * Restore authentication and connections.
+   */
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace("/login");
+    if (!hasHydrated) {
       return;
     }
 
-    const syncUser = async () => {
+    let cancelled = false;
+
+    const restoreSession = async () => {
       try {
+        console.log("===== RESTORING AUTH SESSION =====");
+
+        const currentAccessToken = useAuthStore.getState().accessToken;
+
+        /*
+         * After a full browser refresh the access token is
+         * intentionally gone from Zustand memory.
+         *
+         * Restore it using the HttpOnly refresh-token cookie.
+         */
+        if (!currentAccessToken) {
+          console.log("No access token in memory → refreshing session");
+
+          const refreshResponse = await AuthService.refresh();
+
+          if (!refreshResponse?.accessToken) {
+            throw new Error("Failed to restore access token");
+          }
+
+          setAccessToken(refreshResponse.accessToken);
+
+          console.log("Access token restored successfully");
+        }
+
+        /*
+         * Now that we have a valid access token,
+         * restore the authenticated user.
+         */
         const user = await AuthService.me();
+
+        if (cancelled) {
+          return;
+        }
 
         setUser(user);
 
-        await loadConnections();
-      } catch (error) {
-        console.error(error);
+        console.log("Authenticated user restored:", user);
 
-        await AuthService.logout().catch(() => {});
+        /*
+         * Now restore database connections.
+         */
+        await loadConnections();
+
+        console.log("Connections restored successfully");
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error("Failed to restore authentication session:", error);
 
         logout();
 
         router.replace("/login");
+      } finally {
+        if (!cancelled) {
+          setRestoringAuth(false);
+        }
       }
     };
 
-    void syncUser();
-  }, [isAuthenticated, logout, router, setUser]);
+    void restoreSession();
 
+    return () => {
+      cancelled = true;
+    };
+  }, [hasHydrated, logout, router, setAccessToken, setUser]);
+
+  /*
+   * Debug metadata state.
+   */
   useEffect(() => {
     console.log("Metadata Store:", metadata);
   }, [metadata]);
 
+  /*
+   * Called when QueryService creates a
+   * new conversation.
+   */
   function handleConversationCreated(conversationId: string) {
     setActiveConversationId(conversationId);
 
     setConversationRefreshKey((previous) => previous + 1);
   }
 
+  /*
+   * New Chat:
+   * - clear current conversation
+   * - remount ChatWorkspace
+   * - keep selected database
+   */
   function handleNewChat() {
     setActiveConversationId(undefined);
+
     setChatResetKey((previous) => previous + 1);
+  }
+
+  /*
+   * Database selection:
+   * - persist selected DB
+   * - clear current conversation
+   * - reset chat
+   * - load new DB metadata
+   */
+  async function handleConnectionSelect(connection: DatabaseConnection) {
+    setSelectedConnection(connection);
+
+    window.localStorage.setItem(SELECTED_CONNECTION_KEY, connection.id);
+
+    // Changing database = new empty chat
+    setActiveConversationId(undefined);
+
+    setChatResetKey((previous) => previous + 1);
+
+    await loadMetadata(connection.id);
   }
 
   const hasConnections = connections.length > 0;
 
+  const connectionsResolved = !loadingConnections;
+
+  if (!hasHydrated || restoringAuth) {
+    return null;
+  }
+
   return (
-    <div className="flex h-full min-h-0">
+    <div className="flex h-screen min-h-0 overflow-hidden bg-black">
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         activeConversationId={activeConversationId}
-        onSelectConversation={setActiveConversationId}
-        onNewChat={handleNewChat}
+        onSelectConversation={(conversationId) => {
+          setActiveConversationId(conversationId);
+          setSidebarOpen(false);
+        }}
+        onNewChat={() => {
+          handleNewChat();
+          setSidebarOpen(false);
+        }}
         conversationRefreshKey={conversationRefreshKey}
-        className={!hasConnections ? "pointer-events-none blur-sm opacity-40" : ""}
       />
 
       <div
         className={cn(
           "flex min-w-0 flex-1 flex-col",
-          !hasConnections && "pointer-events-none blur-sm opacity-40"
+          connectionsResolved && !hasConnections && "pointer-events-none blur-sm opacity-40"
         )}
       >
-        <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3 lg:px-6">
+        <header className="flex min-h-[57px] shrink-0 items-center justify-between border-b border-border px-3 py-2.5 sm:px-4 sm:py-3 lg:px-6">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              className="focus-ring rounded-lg p-1.5 text-muted hover:text-foreground lg:hidden"
+              className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-white/[0.05] hover:text-foreground lg:hidden"
+              aria-label="Open navigation"
             >
               <Menu size={18} />
             </button>
@@ -202,14 +333,7 @@ export function DashboardShell() {
             <ConnectionSelector
               connections={connections}
               selected={selectedConnection}
-              onSelect={async (connection) => {
-                setSelectedConnection(connection);
-
-                setActiveConversationId(undefined);
-                setChatResetKey((previous) => previous + 1);
-
-                await loadMetadata(connection.id);
-              }}
+              onSelect={handleConnectionSelect}
               onRefresh={loadConnections}
               onAddConnection={() => setConnectionDialogOpen(true)}
             />
