@@ -12,35 +12,37 @@ export interface Conversation {
 export interface ConversationMessage {
   id: string;
   conversationId: string;
-  role: string;
-  question?: string | null;
-  reply?: string | null;
-  generatedQuery?: string | null;
-  analysis?: unknown;
-  result?: unknown;
+  role: "USER" | "ASSISTANT";
+  question: string | null;
+  reply: string | null;
+  generatedQuery: string | null;
+  analysis: unknown;
+  result: unknown;
   createdAt: string;
 }
 
 interface ConversationListResponse {
   success: boolean;
   data: Conversation[];
+  message?: string;
 }
 
 interface ConversationMessagesResponse {
   success: boolean;
   data: ConversationMessage[];
+  message?: string;
 }
 
 export class ConversationService {
   static async getConversations(): Promise<Conversation[]> {
-    const { data } = await queryApi.get<ConversationListResponse>("/conversations");
+    const { data } = await queryApi.get<ConversationListResponse>("/query/conversations");
 
     return data.data;
   }
 
   static async getMessages(conversationId: string): Promise<ConversationMessage[]> {
     const { data } = await queryApi.get<ConversationMessagesResponse>(
-      `/conversations/${conversationId}/messages`
+      `/query/conversations/${conversationId}/messages`
     );
 
     return data.data;

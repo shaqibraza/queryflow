@@ -1,21 +1,33 @@
 "use client";
 
 import { MetadataService, type DatabaseMetadata } from "@/src/services/metadata.service";
+
 import { useEffect, useState } from "react";
+
 import { Menu } from "lucide-react";
+
 import { useRouter } from "next/navigation";
+
 import { useMetadataStore } from "@/src/stores/metadata.store";
+
 import { Sidebar } from "./Sidebar";
+
 import { ChatWorkspace } from "@/components/chat/ChatWorkspace";
+
 import { ConnectionGate } from "@/components/connection/ConnectionGate";
+
 import { ConnectionSelector } from "@/components/connection/ConnectionSelector";
+
 import { EmptyConnectionCard } from "@/components/connection/EmptyConnectionCard";
+
 import { CreateConnectionDialog } from "@/components/connection/CreateConnectionDialog";
 
 import { cn } from "@/lib/utils";
 
 import { AuthService } from "@/src/services/auth.service";
+
 import { ConnectionService, type DatabaseType } from "@/src/services/connection.service";
+
 import { useAuthStore } from "@/src/stores/auth.store";
 
 interface DatabaseConnection {
@@ -35,6 +47,8 @@ export function DashboardShell() {
 
   const [activeConversationId, setActiveConversationId] = useState<string | undefined>();
 
+  const [conversationRefreshKey, setConversationRefreshKey] = useState(0);
+
   const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
 
   const [connections, setConnections] = useState<DatabaseConnection[]>([]);
@@ -49,6 +63,36 @@ export function DashboardShell() {
 
   const logout = useAuthStore((state) => state.logout);
 
+  const metadata = useMetadataStore((state) => state.metadata);
+
+  const getCachedMetadata = useMetadataStore((state) => state.getMetadata);
+
+  const setMetadata = useMetadataStore((state) => state.setMetadata);
+
+  const setMetadataLoading = useMetadataStore((state) => state.setLoading);
+
+  async function loadMetadata(connectionId: string) {
+    const cached = getCachedMetadata(connectionId);
+
+    if (cached) {
+      setMetadata(connectionId, cached);
+
+      return;
+    }
+
+    try {
+      setMetadataLoading(true);
+
+      const metadata = await MetadataService.getMetadata(connectionId);
+
+      setMetadata(connectionId, metadata);
+    } catch (error) {
+      console.error("Failed to load metadata:", error);
+    } finally {
+      setMetadataLoading(false);
+    }
+  }
+
   async function loadConnections() {
     try {
       setLoadingConnections(true);
@@ -57,30 +101,25 @@ export function DashboardShell() {
 
       setConnections(list);
 
-      setSelectedConnection((prev) => {
+      setSelectedConnection((previous) => {
         if (list.length === 0) {
           return null;
         }
 
-        if (!prev) {
+        if (!previous) {
           return list[0];
         }
 
-        const exists = list.find((connection) => connection.id === prev.id);
-
-        console.log("connections state:", connections);
-
-        console.log("connections.length:", connections.length);
-
-        console.log("hasConnections:", hasConnections);
+        const exists = list.find((connection) => connection.id === previous.id);
 
         return exists ?? list[0];
       });
+
       if (list.length > 0) {
         await loadMetadata(list[0].id);
       }
     } catch (error) {
-      console.error("Failed to load connections", error);
+      console.error("Failed to load connections:", error);
     } finally {
       setLoadingConnections(false);
     }
@@ -110,57 +149,34 @@ export function DashboardShell() {
       }
     };
 
-    syncUser();
+    void syncUser();
   }, [isAuthenticated, logout, router, setUser]);
-
-  const hasConnections = connections.length > 0;
-
-  const metadata = useMetadataStore((state) => state.metadata);
-
-  const getCachedMetadata = useMetadataStore((state) => state.getMetadata);
-
-  const setMetadata = useMetadataStore((state) => state.setMetadata);
-
-  const setMetadataLoading = useMetadataStore((state) => state.setLoading);
-
-  async function loadMetadata(connectionId: string) {
-    const cached = getCachedMetadata(connectionId);
-
-    if (cached) {
-      console.log("Metadata loaded from cache.");
-
-      setMetadata(connectionId, cached);
-
-      return;
-    }
-
-    try {
-      setMetadataLoading(true);
-
-      const metadata = await MetadataService.getMetadata(connectionId);
-
-      setMetadata(connectionId, metadata);
-
-      console.log("Metadata fetched from server.");
-    } catch (error) {
-      console.error("Failed to load metadata", error);
-    } finally {
-      setMetadataLoading(false);
-    }
-  }
 
   useEffect(() => {
     console.log("Metadata Store:", metadata);
   }, [metadata]);
 
+  function handleConversationCreated(conversationId: string) {
+    setActiveConversationId(conversationId);
+
+    setConversationRefreshKey((previous) => previous + 1);
+  }
+
+  function handleNewChat() {
+    setActiveConversationId(undefined);
+  }
+
+  const hasConnections = connections.length > 0;
+
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-full min-h-0">
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         activeConversationId={activeConversationId}
         onSelectConversation={setActiveConversationId}
-        onNewChat={() => setActiveConversationId(undefined)}
+        onNewChat={handleNewChat}
+        conversationRefreshKey={conversationRefreshKey}
         className={!hasConnections ? "pointer-events-none blur-sm opacity-40" : ""}
       />
 
@@ -185,6 +201,7 @@ export function DashboardShell() {
               selected={selectedConnection}
               onSelect={async (connection) => {
                 setSelectedConnection(connection);
+
                 await loadMetadata(connection.id);
               }}
               onRefresh={loadConnections}
@@ -195,7 +212,11 @@ export function DashboardShell() {
 
         <main className="min-h-0 flex-1">
           <ConnectionGate hasConnection={hasConnections}>
-            <ChatWorkspace selectedConnection={selectedConnection} />
+            <ChatWorkspace
+              selectedConnection={selectedConnection}
+              activeConversationId={activeConversationId}
+              onConversationCreated={handleConversationCreated}
+            />
           </ConnectionGate>
         </main>
       </div>

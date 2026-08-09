@@ -29,7 +29,7 @@ export class ChatService {
     return data.data as ChatResponse;
   }
 
-  static async execute(connectionId: string, query: unknown) {
+  static async execute(connectionId: string, query: string) {
     const { data } = await queryApi.post("/query/execute", {
       connectionId,
       query
