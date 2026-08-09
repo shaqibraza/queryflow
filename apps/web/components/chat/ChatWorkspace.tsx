@@ -14,6 +14,8 @@ import type { DatabaseConnection } from "@/components/connection/ConnectionSelec
 
 import { ChatService } from "@/src/services/chat.service";
 
+import { ConversationService, type ConversationMessage } from "@/src/services/conversation.service";
+
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -156,6 +158,54 @@ export function ChatWorkspace({
       console.error("Execution Failed:", error);
     }
   }
+
+  useEffect(() => {
+    if (!activeConversationId) {
+      return;
+    }
+
+    const loadMessages = async () => {
+      try {
+        setIsTyping(false);
+
+        const conversationMessages = await ConversationService.getMessages(activeConversationId);
+
+        const loadedMessages: Message[] = conversationMessages.flatMap((message) => {
+          const result: Message[] = [];
+
+          if (message.role === "USER") {
+            result.push({
+              id: message.id,
+              role: "user",
+              content: message.question ?? ""
+            });
+          }
+
+          if (message.role === "ASSISTANT") {
+            result.push({
+              id: message.id,
+              role: "assistant",
+              content: message.reply ?? "Query generated successfully.",
+              connectionId: selectedConnection?.id,
+              sql: message.generatedQuery ?? undefined,
+              result: message.result,
+              analysis: message.analysis as Message["analysis"] | undefined
+            });
+          }
+
+          return result;
+        });
+
+        setMessages(loadedMessages);
+      } catch (error) {
+        console.error("Failed to load conversation messages:", error);
+
+        setMessages([]);
+      }
+    };
+
+    void loadMessages();
+  }, [activeConversationId, selectedConnection?.id]);
 
   const hasMessages = messages.length > 0;
 

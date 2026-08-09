@@ -57,6 +57,8 @@ export function DashboardShell() {
 
   const [loadingConnections, setLoadingConnections] = useState(true);
 
+  const [chatResetKey, setChatResetKey] = useState(0);
+
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const setUser = useAuthStore((state) => state.setUser);
@@ -164,6 +166,7 @@ export function DashboardShell() {
 
   function handleNewChat() {
     setActiveConversationId(undefined);
+    setChatResetKey((previous) => previous + 1);
   }
 
   const hasConnections = connections.length > 0;
@@ -202,6 +205,9 @@ export function DashboardShell() {
               onSelect={async (connection) => {
                 setSelectedConnection(connection);
 
+                setActiveConversationId(undefined);
+                setChatResetKey((previous) => previous + 1);
+
                 await loadMetadata(connection.id);
               }}
               onRefresh={loadConnections}
@@ -213,6 +219,7 @@ export function DashboardShell() {
         <main className="min-h-0 flex-1">
           <ConnectionGate hasConnection={hasConnections}>
             <ChatWorkspace
+              key={chatResetKey}
               selectedConnection={selectedConnection}
               activeConversationId={activeConversationId}
               onConversationCreated={handleConversationCreated}
