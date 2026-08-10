@@ -60,4 +60,10 @@ export class AuthService {
 
     return data.data;
   }
+
+  static async updateProfile(payload: { firstName: string; lastName: string }) {
+    const { data } = await authApi.patch("/update-profile", payload);
+
+    return data.data;
+  }
 }

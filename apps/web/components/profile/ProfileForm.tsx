@@ -1,31 +1,101 @@
 "use client";
 
 import Image from "next/image";
-import { Camera, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Camera, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { useAuthStore } from "@/src/stores/auth.store";
+import { AuthService } from "@/src/services/auth.service";
+import { getAuthErrorMessage } from "@/lib/get-auth-error-message";
 
 export function ProfileForm() {
   const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
 
   const [firstName, setFirstName] = useState(user?.firstName ?? "");
+
   const [lastName, setLastName] = useState(user?.lastName ?? "");
 
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  /*
+   * Keep local form values synchronized
+   * with the Zustand user.
+   */
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    setFirstName(user.firstName);
+    setLastName(user.lastName);
+  }, [user]);
 
   const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase();
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    console.log({
-      firstName,
-      lastName
-    });
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    const trimmedFirstName = firstName.trim();
+    const trimmedLastName = lastName.trim();
+
+    if (trimmedFirstName.length < 2 || trimmedLastName.length < 2) {
+      setErrorMessage("First name and last name must be at least 2 characters.");
+
+      return;
+    }
+
+    if (!user) {
+      setErrorMessage("Unable to update profile. Please log in again.");
+
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await AuthService.updateProfile({
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName
+      });
+
+      /*
+       * Backend returns:
+       *
+       * {
+       *   user: {...}
+       * }
+       */
+      const updatedUser = response.user;
+
+      /*
+       * Update Zustand so the new name is
+       * immediately reflected everywhere.
+       */
+      setUser(updatedUser);
+
+      setFirstName(updatedUser.firstName);
+      setLastName(updatedUser.lastName);
+
+      setSuccessMessage("Profile updated successfully.");
+    } catch (error) {
+      console.error("Profile update failed:", error);
+
+      setErrorMessage(getAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div className="w-full max-w-2xl rounded-2xl border border-border bg-[#0d0d12]/70 p-8 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+    <div className="w-full max-w-md">
       <h1 className="text-2xl font-semibold text-foreground">Profile</h1>
 
       <p className="mt-2 text-sm text-muted">Manage your personal information.</p>
@@ -62,7 +132,8 @@ export function ProfileForm() {
           <input
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-accent"
+            disabled={loading}
+            className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-accent disabled:cursor-not-allowed disabled:opacity-70"
           />
         </div>
 
@@ -74,7 +145,8 @@ export function ProfileForm() {
           <input
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-accent"
+            disabled={loading}
+            className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition focus:border-accent disabled:cursor-not-allowed disabled:opacity-70"
           />
         </div>
 
@@ -88,7 +160,41 @@ export function ProfileForm() {
             value={user?.email ?? ""}
             className="h-11 w-full cursor-not-allowed rounded-xl border border-border bg-background/50 px-4 text-sm text-muted"
           />
+
+          <div className="flex items-center gap-1.5 text-xs">
+            {user?.emailVerified ? (
+              <>
+                <CheckCircle2 size={14} className="text-success" />
+
+                <span className="text-success">Verified</span>
+              </>
+            ) : (
+              <>
+                <AlertCircle size={14} className="text-yellow-400" />
+
+                <span className="text-yellow-400">Not verified</span>
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Feedback */}
+
+        {successMessage && (
+          <div className="flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2.5 text-[13px] text-success">
+            <CheckCircle2 size={14} className="shrink-0" />
+
+            {successMessage}
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="flex items-center gap-2 rounded-lg bg-danger/10 px-3 py-2.5 text-[13px] text-danger">
+            <AlertCircle size={14} className="shrink-0" />
+
+            {errorMessage}
+          </div>
+        )}
 
         {/* Save */}
 

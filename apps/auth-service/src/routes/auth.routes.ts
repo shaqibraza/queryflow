@@ -7,14 +7,16 @@ import {
   login,
   me,
   verifyEmail,
-  resendVerificationOtp
+  resendVerificationOtp,
+  updateProfile
 } from "../controller/auth.controller.js";
 
 import {
   registerSchema,
   loginSchema,
   verifyEmailSchema,
-  resendVerificationSchema
+  resendVerificationSchema,
+  updateProfileSchema
 } from "../validator/auth.validator.js";
 
 import { validate } from "../middleware/validate.middleware.js";
@@ -36,5 +38,7 @@ router.post("/refresh", refresh);
 router.post("/logout", logout);
 
 router.get("/me", authenticate, me);
+
+router.patch("/update-profile", authenticate, validate(updateProfileSchema), updateProfile);
 
 export default router;

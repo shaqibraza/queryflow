@@ -577,3 +577,43 @@ export const me = async (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 };
+
+export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+    }
+
+    const { firstName, lastName } = req.body;
+
+    const user = await prisma.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        firstName,
+        lastName
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        avatar: true,
+        emailVerified: true
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: { user }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

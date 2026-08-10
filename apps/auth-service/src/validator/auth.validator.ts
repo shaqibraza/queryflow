@@ -35,8 +35,15 @@ export const resendVerificationSchema = z.object({
   email: z.string().trim().toLowerCase().email("Invalid email address")
 });
 
+export const updateProfileSchema = z.object({
+  firstName: z.string().trim().min(2, "First name must be at least 2 characters").max(50),
+
+  lastName: z.string().trim().min(2, "Last name must be at least 2 characters").max(50)
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RefreshInput = z.infer<typeof refreshSchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
