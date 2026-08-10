@@ -26,7 +26,7 @@ export function RegisterForm() {
     watch,
     formState: { errors, touchedFields, isSubmitting }
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema as any),
     mode: "onBlur",
     defaultValues: {
       firstName: "",

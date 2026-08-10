@@ -99,9 +99,19 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
   try {
     const { email, otp } = req.body;
 
-    // 1. Find user
+    // 1. Find user (select verification fields so types include them)
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        avatar: true,
+        emailVerified: true,
+        verificationOtp: true,
+        verificationOtpExpiry: true
+      }
     });
     if (!user) {
       return res.status(404).json({
@@ -127,7 +137,10 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
     }
 
     // 4. Check OTP expiry
-    if (new Date() > user.verificationOtpExpiry) {
+    if (
+      user.verificationOtpExpiry &&
+      new Date() > (user.verificationOtpExpiry as unknown as Date)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Verification OTP has expired"
