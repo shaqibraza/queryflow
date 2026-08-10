@@ -12,6 +12,7 @@ import {
   verifyVerificationOtp
 } from "../utils/verification-otp.js";
 import { sendVerificationEmail } from "../utils/mailer.js";
+import { uploadAvatar } from "../utils/cloudinary.js";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -614,6 +615,53 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
       data: { user }
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadAvatarController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Avatar image is required"
+      });
+    }
+
+    const uploadResult = await uploadAvatar(req.file.buffer, userId);
+
+    const user = await prisma.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        avatar: uploadResult.secure_url
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        avatar: true,
+        emailVerified: true
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Avatar updated successfully",
+      data: { user }
+    });
+  } catch (error) {
+    console.error("Avatar uplaod failed", error);
     next(error);
   }
 };

@@ -17,6 +17,10 @@ function attachAuth(config: InternalAxiosRequestConfig) {
     config.headers.set("x-user-id", user.id);
   }
 
+  if (config.data instanceof FormData) {
+    config.headers.delete("Content-Type");
+  }
+
   return config;
 }
 

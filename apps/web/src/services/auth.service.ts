@@ -66,4 +66,14 @@ export class AuthService {
 
     return data.data;
   }
+
+  static async uploadAvatar(file: File) {
+    const formData = new FormData();
+
+    formData.append("avatar", file);
+
+    const { data } = await authApi.post("/avatar", formData);
+
+    return data.data;
+  }
 }

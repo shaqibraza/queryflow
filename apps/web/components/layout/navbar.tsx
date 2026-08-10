@@ -6,8 +6,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { IconDatabase, IconMenu2, IconX } from "@tabler/icons-react";
 import BorderBeam from "../ui/border-beam";
 import { useRouter } from "next/navigation";
-import { ChevronDown, LogOut, UserRound } from "lucide-react";
-
+import { ChevronDown, LogOut, UserRound, LayoutDashboard } from "lucide-react";
+import Image from "next/image";
 import { useAuthStore } from "@/src/stores/auth.store";
 import { AuthService } from "@/src/services/auth.service";
 
@@ -19,10 +19,6 @@ const navigation = [
   {
     name: "How it Works",
     href: "#how-it-works"
-  },
-  {
-    name: "Docs",
-    href: "/docs"
   },
   {
     name: "GitHub",
@@ -128,6 +124,16 @@ export function Navbar() {
                 {item.name}
               </Link>
             ))}
+
+            {isLoggedIn && (
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-1.5 text-sm font-medium text-zinc-400 transition-colors duration-200 hover:text-white"
+              >
+                <LayoutDashboard size={15} />
+                Dashboard
+              </Link>
+            )}
           </div>
 
           {/* Actions — desktop only */}
@@ -165,8 +171,18 @@ export function Navbar() {
                   onClick={() => setProfileOpen((previous) => !previous)}
                   className="flex items-center gap-2 rounded-full px-2 py-1.5 text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-[11px] font-semibold text-white">
-                    {initials}
+                  <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-[11px] font-semibold text-white">
+                    {user?.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        alt={user.firstName ?? "User"}
+                        fill
+                        sizes="32px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      initials
+                    )}
                   </div>
 
                   <span>{user?.firstName}</span>

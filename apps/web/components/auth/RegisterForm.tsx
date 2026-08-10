@@ -188,17 +188,17 @@ export function RegisterForm() {
         className="flex items-center gap-3"
       >
         <span className="h-px flex-1 bg-border" />
-        <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Or</span>
+        {/* <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Or</span> */}
         <span className="h-px flex-1 bg-border" />
       </motion.div>
 
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.4 }}
       >
         <OAuthButtons />
-      </motion.div>
+      </motion.div> */}
     </form>
   );
 }

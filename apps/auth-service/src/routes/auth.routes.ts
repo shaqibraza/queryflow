@@ -8,7 +8,8 @@ import {
   me,
   verifyEmail,
   resendVerificationOtp,
-  updateProfile
+  updateProfile,
+  uploadAvatarController
 } from "../controller/auth.controller.js";
 
 import {
@@ -22,6 +23,7 @@ import {
 import { validate } from "../middleware/validate.middleware.js";
 
 import { authenticate } from "../middleware/auth.middleware.js";
+import { uploadAvatar } from "../middleware/upload.middleware.js";
 
 const router = Router();
 
@@ -40,5 +42,7 @@ router.post("/logout", logout);
 router.get("/me", authenticate, me);
 
 router.patch("/update-profile", authenticate, validate(updateProfileSchema), updateProfile);
+
+router.post("/avatar", authenticate, uploadAvatar.single("avatar"), uploadAvatarController);
 
 export default router;

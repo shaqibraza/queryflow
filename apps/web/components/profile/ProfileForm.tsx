@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Camera, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import { useAuthStore } from "@/src/stores/auth.store";
 import { AuthService } from "@/src/services/auth.service";
@@ -21,6 +21,8 @@ export function ProfileForm() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   /*
    * Keep local form values synchronized
@@ -94,6 +96,53 @@ export function ProfileForm() {
     }
   }
 
+  async function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    if (!file.type.startsWith("image/")) {
+      setErrorMessage("Please select a valid image.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("Image size must be less than 5 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await AuthService.uploadAvatar(file);
+
+      const updatedUser = response.user;
+
+      setUser(updatedUser);
+
+      setSuccessMessage("Avatar updated successfully.");
+    } catch (error) {
+      console.error("Avatar upload failed:", error);
+
+      setErrorMessage(getAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
+
+      /*
+       * Allows selecting the same file again
+       * after an upload/error.
+       */
+      event.target.value = "";
+    }
+  }
+
   return (
     <div className="w-full max-w-md">
       <h1 className="text-2xl font-semibold text-foreground">Profile</h1>
@@ -114,14 +163,25 @@ export function ProfileForm() {
             )}
           </div>
 
-          <button
-            type="button"
-            disabled
-            className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-muted transition hover:bg-white/[0.04] disabled:cursor-not-allowed"
-          >
-            <Camera size={16} />
-            Change Photo
-          </button>
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+              className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-muted transition hover:bg-white/[0.04] disabled:cursor-not-allowed"
+            >
+              <Camera size={16} />
+              Change Photo
+            </button>
+          </div>
         </div>
 
         {/* First Name */}

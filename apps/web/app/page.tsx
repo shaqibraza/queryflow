@@ -13,6 +13,7 @@ import { CTA } from "@/components/landing/cta";
 
 import { AuthService } from "@/src/services/auth.service";
 import { useAuthStore } from "@/src/stores/auth.store";
+import { AmbientBackground } from "@/components/auth/AmbientBackground";
 
 export default function HomePage() {
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
@@ -137,7 +138,7 @@ export default function HomePage() {
 
   return (
     <main className="relative min-h-screen bg-[#09090B]">
-      <Background />
+      <AmbientBackground />
       <Navbar />
       <Hero />
       <Features />
