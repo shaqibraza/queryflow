@@ -6,10 +6,16 @@ import {
   register,
   login,
   me,
-  verifyEmail
+  verifyEmail,
+  resendVerificationOtp
 } from "../controller/auth.controller.js";
 
-import { registerSchema, loginSchema, verifyEmailSchema } from "../validator/auth.validator.js";
+import {
+  registerSchema,
+  loginSchema,
+  verifyEmailSchema,
+  resendVerificationSchema
+} from "../validator/auth.validator.js";
 
 import { validate } from "../middleware/validate.middleware.js";
 
@@ -20,6 +26,8 @@ const router = Router();
 router.post("/register", validate(registerSchema), register);
 
 router.post("/verify-email", validate(verifyEmailSchema), verifyEmail);
+
+router.post("/resend-verification", validate(resendVerificationSchema), resendVerificationOtp);
 
 router.post("/login", validate(loginSchema), login);
 

@@ -179,6 +179,69 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+export const resendVerificationOtp = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.body;
+
+    const genericResponse = {
+      success: true,
+      message: "If the account exists and is not verified, a new verification code has been sent."
+    };
+
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+    if (!user) {
+      return res.status(200).json(genericResponse);
+    }
+
+    if (user.emailVerified) {
+      return res.status(200).json(genericResponse);
+    }
+
+    const verificationOtp = generateVerificationOtp();
+
+    const hashedVerificationOtp = await hashVerificationOtp(verificationOtp);
+
+    const verificationOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        verificationOtp: hashedVerificationOtp,
+        verificationOtpExpiry
+      }
+    });
+
+    try {
+      await sendVerificationEmail(user.email, verificationOtp);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+
+      await prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          verificationOtp: null,
+          verificationOtpExpiry: null
+        }
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Unable to send verification email. Please try again."
+      });
+    }
+    return res.status(200).json(genericResponse);
+  } catch (error) {
+    console.error("Resend verification OTP error:", error);
+    next(error);
+  }
+};
+
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password, rememberMe } = req.body;

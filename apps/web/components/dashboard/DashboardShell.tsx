@@ -110,6 +110,7 @@ export function DashboardShell() {
    */
   async function loadConnections() {
     console.log("🔥 loadConnections CALLED");
+
     try {
       setLoadingConnections(true);
 
@@ -119,41 +120,52 @@ export function DashboardShell() {
 
       setConnections(list);
 
-      setSelectedConnection((previous) => {
-        if (list.length === 0) {
-          return null;
-        }
+      // No database connections available
+      if (list.length === 0) {
+        setSelectedConnection(null);
 
-        if (!previous) {
-          return list[0];
-        }
+        window.localStorage.removeItem(SELECTED_CONNECTION_KEY);
 
-        const existing = list.find((connection) => connection.id === previous.id);
+        return;
+      }
 
-        return existing ?? list[0];
-      });
-
-      // Read directly from localStorage.
-      // This avoids React state hydration/race issues.
+      // Read persisted selected connection
       const savedConnectionId = window.localStorage.getItem(SELECTED_CONNECTION_KEY);
 
+      console.log("Saved connection ID:", savedConnectionId);
+
+      // Find the previously selected connection
       const savedConnection = savedConnectionId
         ? list.find((connection) => connection.id === savedConnectionId)
         : undefined;
 
-      // Restore saved DB if it still exists.
-      // Otherwise use the first available DB.
+      // Restore saved connection.
+      // If it no longer exists, use the first connection.
       const connectionToSelect = savedConnection ?? list[0];
 
+      console.log("Connection selected:", connectionToSelect);
+
+      // Safety check
+      if (!connectionToSelect) {
+        setSelectedConnection(null);
+        return;
+      }
+
+      // Update React state
       setSelectedConnection(connectionToSelect);
 
-      // Persist the actual selected connection.
+      // Persist selected connection
       window.localStorage.setItem(SELECTED_CONNECTION_KEY, connectionToSelect.id);
 
-      // Load metadata for the restored DB.
+      console.log("Selected connection persisted:", connectionToSelect.id);
+
+      // Restore metadata
       await loadMetadata(connectionToSelect.id);
     } catch (error) {
       console.error("Failed to load connections:", error);
+
+      setConnections([]);
+      setSelectedConnection(null);
     } finally {
       setLoadingConnections(false);
     }

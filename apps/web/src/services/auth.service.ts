@@ -13,9 +13,26 @@ export interface LoginPayload {
   rememberMe: boolean;
 }
 
+export interface VerifyEmailPayload {
+  email: string;
+  otp: string;
+}
+
 export class AuthService {
   static async register(payload: RegisterPayload) {
     const { data } = await authApi.post("/register", payload);
+
+    return data;
+  }
+
+  static async verifyEmail(payload: VerifyEmailPayload) {
+    const { data } = await authApi.post("/verify-email", payload);
+
+    return data;
+  }
+
+  static async resendVerificationOtp(email: string) {
+    const { data } = await authApi.post("/resend-verification", { email });
 
     return data;
   }

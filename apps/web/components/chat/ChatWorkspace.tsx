@@ -208,6 +208,14 @@ export function ChatWorkspace({
   }, [activeConversationId, selectedConnection?.id]);
 
   const hasMessages = messages.length > 0;
+  console.table(
+    messages.map((message, index) => ({
+      index,
+      id: message.id,
+      role: message.role,
+      content: message.content
+    }))
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -220,7 +228,7 @@ export function ChatWorkspace({
           </div>
         ) : (
           <div className="mx-auto w-full max-w-4xl px-3 py-6 sm:px-6 lg:px-8">
-            <div className="space-y-5">
+            <div className="flex flex-col gap-6">
               <AnimatePresence initial={false}>
                 {messages.map((message) =>
                   message.role === "user" ? (

@@ -8,40 +8,52 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-export async function sendVerificationEmail(email: string, otp: string) {
-  await transporter.sendMail({
-    from: `"QueryFlow" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "Verify your QueryFlow account",
-    text: `Your QueryFlow verification code is ${otp}. This code expires in 10 minutes.`,
-    html: `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto;">
-        <h2>Verify your QueryFlow account</h2>
+export async function sendVerificationEmail(email: string, otp: string): Promise<void> {
+  try {
+    await transporter.sendMail({
+      from: `"QueryFlow" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Verify your QueryFlow account",
 
-        <p>
+      text: `Your QueryFlow verification code is ${otp}. This code expires in 10 minutes.`,
+
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
+          <h2>Verify your QueryFlow account</h2>
+
+          <p>
             Thanks for creating a QueryFlow account.
             Use the verification code below:
-        </p>
+          </p>
 
-        <div
+          <div
             style="
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 8px;
-            margin: 24px 0;
+              font-size: 32px;
+              font-weight: bold;
+              letter-spacing: 8px;
+              margin: 24px 0;
             "
-        >
+          >
             ${otp}
-        </div>
+          </div>
 
-        <p>
+          <p>
             This code will expire in <strong>10 minutes</strong>.
-        </p>
+          </p>
 
-        <p>
+          <p>
             If you didn't create this account, you can safely ignore this email.
-        </p>
+          </p>
         </div>
-    `
-  });
+      `
+    });
+
+    console.log(`Verification email sent successfully to ${email}`);
+  } catch (error) {
+    console.error("========== NODEMAILER ERROR ==========");
+    console.error(error);
+    console.error("======================================");
+
+    throw error;
+  }
 }

@@ -50,8 +50,8 @@ export function RegisterForm() {
         password: data.password
       });
 
-      toast.success("Account created successfully.");
-      router.push("/login");
+      toast.success("Account created. Check your email for the verification code.");
+      router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
       setSubmitError(getAuthErrorMessage(error));
     }

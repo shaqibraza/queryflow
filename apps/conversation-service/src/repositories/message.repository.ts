@@ -40,7 +40,7 @@ export class MessageRepository {
         conversationId
       },
       orderBy: {
-        createdAt: "desc"
+        createdAt: "asc"
       }
     });
   }
