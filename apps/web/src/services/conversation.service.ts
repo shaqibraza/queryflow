@@ -47,4 +47,14 @@ export class ConversationService {
 
     return data.data;
   }
+
+  static async renameConversation(conversationId: string, title: string): Promise<Conversation> {
+    const { data } = await queryApi.patch(`/query/conversations/${conversationId}`, { title });
+
+    return data.data;
+  }
+
+  static async deleteConversation(conversationId: string): Promise<void> {
+    await queryApi.delete(`/query/conversations/${conversationId}`);
+  }
 }

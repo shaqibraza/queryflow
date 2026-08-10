@@ -41,6 +41,14 @@ export function Sidebar({
 
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
 
+  const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
+
+  const [editingTitle, setEditingTitle] = useState("");
+
+  const [actionConversationId, setActionConversationId] = useState<string | null>(null);
+
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -97,6 +105,69 @@ export function Sidebar({
 
     // Close drawer after starting a new chat.
     onClose();
+  }
+
+  async function handleRename(conversationId: string, title: string) {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+      return;
+    }
+
+    try {
+      setActionConversationId(conversationId);
+
+      const updatedConversation = await ConversationService.renameConversation(
+        conversationId,
+        trimmedTitle
+      );
+
+      setConversations((previous) =>
+        previous.map((conversation) =>
+          conversation.id === conversationId ? updatedConversation : conversation
+        )
+      );
+
+      setEditingConversationId(null);
+      setEditingTitle("");
+      setOpenMenuId(null);
+    } catch (error) {
+      console.error("Failed to rename conversation:", error);
+    } finally {
+      setActionConversationId(null);
+    }
+  }
+
+  async function handleDelete(conversationId: string) {
+    const confirmed = window.confirm("Are you sure you want to delete this conversation?");
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setActionConversationId(conversationId);
+
+      await ConversationService.deleteConversation(conversationId);
+
+      setConversations((previous) =>
+        previous.filter((conversation) => conversation.id !== conversationId)
+      );
+
+      setOpenMenuId(null);
+
+      /*
+       * If the currently active conversation was deleted,
+       * start a fresh chat.
+       */
+      if (conversationId === activeConversationId) {
+        onNewChat();
+      }
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
+    } finally {
+      setActionConversationId(null);
+    }
   }
 
   return (
@@ -191,7 +262,10 @@ export function Sidebar({
                   label={conversation.title}
                   meta={formatConversationDate(conversation.updatedAt)}
                   active={conversation.id === activeConversationId}
+                  isLoading={actionConversationId === conversation.id}
                   onClick={() => handleConversationSelect(conversation.id)}
+                  onRename={(title) => handleRename(conversation.id, title)}
+                  onDelete={() => handleDelete(conversation.id)}
                 />
               ))
             )}

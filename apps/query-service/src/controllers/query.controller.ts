@@ -107,4 +107,79 @@ export class QueryController {
       next(error);
     }
   };
+
+  renameConversation = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const conversationId = req.params.id;
+
+      if (!conversationId || typeof conversationId !== "string") {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Conversation ID"
+        });
+      }
+
+      const userId = req.header("x-user-id");
+
+      if (!userId || typeof userId !== "string") {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized"
+        });
+      }
+
+      const title = req.body?.title;
+
+      if (typeof title !== "string" || !title.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Conversation title is required"
+        });
+      }
+
+      const conversation = await this.queryService.renameConversation(
+        conversationId,
+        title.trim(),
+        userId
+      );
+
+      return res.status(200).json({
+        success: true,
+        data: conversation
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteConversation = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const conversationId = req.params.id;
+
+      if (!conversationId || typeof conversationId !== "string") {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid Conversation ID"
+        });
+      }
+
+      const userId = req.header("x-user-id");
+
+      if (!userId || typeof userId !== "string") {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized"
+        });
+      }
+
+      await this.queryService.deleteConversation(conversationId, userId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Conversation deleted successfully"
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

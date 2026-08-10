@@ -38,6 +38,10 @@ export interface SaveAssistantMessageRequest {
   result?: unknown;
 }
 
+export interface RenameConversationRequest {
+  title: string;
+}
+
 interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -121,6 +125,34 @@ export class ConversationClient {
     });
 
     return data.data;
+  }
+
+  async renameConversation(
+    conversationId: string,
+    title: string,
+    userId: string
+  ): Promise<Conversation> {
+    const { data } = await this.client.patch<ApiResponse<Conversation>>(
+      `/conversations/${conversationId}`,
+      {
+        title
+      } satisfies RenameConversationRequest,
+      {
+        headers: {
+          "X-User-Id": userId
+        }
+      }
+    );
+
+    return data.data;
+  }
+
+  async deleteConversation(conversationId: string, userId: string): Promise<void> {
+    await this.client.delete(`/conversations/${conversationId}`, {
+      headers: {
+        "X-User-Id": userId
+      }
+    });
   }
 
   async getMessages(conversationId: string, userId: string): Promise<Message[]> {

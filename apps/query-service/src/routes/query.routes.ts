@@ -36,4 +36,8 @@ router.get("/conversations", queryController.getConversations);
 
 router.get("/conversations/:id/messages", queryController.getConversationMessages);
 
+router.patch("/conversations/:id", queryController.renameConversation);
+
+router.delete("/conversations/:id", queryController.deleteConversation);
+
 export default router;

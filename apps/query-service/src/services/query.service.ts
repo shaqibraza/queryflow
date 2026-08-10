@@ -173,4 +173,12 @@ export class QueryService {
   async getConversationMessages(conversationId: string, userId: string) {
     return this.conversationClient.getMessages(conversationId, userId);
   }
+
+  async renameConversation(conversationId: string, title: string, userId: string) {
+    return this.conversationClient.renameConversation(conversationId, title, userId);
+  }
+
+  async deleteConversation(conversationId: string, userId: string) {
+    await this.conversationClient.deleteConversation(conversationId, userId);
+  }
 }
