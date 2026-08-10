@@ -13,6 +13,9 @@ import {
 } from "../utils/verification-otp.js";
 import { sendVerificationEmail } from "../utils/mailer.js";
 import { uploadAvatar } from "../utils/cloudinary.js";
+import { generatePasswordResetToken, hashPasswordResetToken } from "../utils/password-reset.js";
+import { sendPasswordResetEmail } from "../utils/mailer.js";
+import bcrypt from "bcrypt";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -662,6 +665,118 @@ export const uploadAvatarController = async (req: Request, res: Response, next: 
     });
   } catch (error) {
     console.error("Avatar uplaod failed", error);
+    next(error);
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: "If an account exists with this email, a password reset link has been sent."
+      });
+    }
+
+    await prisma.passwordResetToken.deleteMany({
+      where: {
+        userId: user.id,
+        usedAt: null
+      }
+    });
+
+    const token = generatePasswordResetToken();
+    const tokenHash = hashPasswordResetToken(token);
+
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash,
+        expiresAt
+      }
+    });
+
+    await sendPasswordResetEmail(user.email, token);
+
+    console.log("Password reset token generated:", {
+      userId: user.id,
+      token
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "If an account exists with this email, a password reset link has been sent."
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { token, password } = req.body;
+
+    const tokenHash = hashPasswordResetToken(token);
+
+    const resetToken = await prisma.passwordResetToken.findUnique({
+      where: { tokenHash }
+    });
+
+    if (!resetToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired password reset link."
+      });
+    }
+
+    if (resetToken.usedAt || resetToken.expiresAt <= new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired password reset link."
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: {
+          id: resetToken.userId
+        },
+        data: {
+          passwordHash
+        }
+      }),
+
+      prisma.passwordResetToken.update({
+        where: {
+          id: resetToken.id
+        },
+        data: {
+          usedAt: new Date()
+        }
+      }),
+
+      prisma.refreshToken.deleteMany({
+        where: {
+          userId: resetToken.userId
+        }
+      })
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully. Please log in with your new password."
+    });
+  } catch (error) {
     next(error);
   }
 };

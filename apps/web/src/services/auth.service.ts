@@ -76,4 +76,22 @@ export class AuthService {
 
     return data.data;
   }
+
+  static async forgotPassword(email: string) {
+    const { data } = await authApi.post("/forgot-password", {
+      email
+    });
+
+    return data;
+  }
+
+  static async resetPassword(payload: {
+    token: string;
+    password: string;
+    confirmPassword: string;
+  }) {
+    const { data } = await authApi.post("/reset-password", payload);
+
+    return data;
+  }
 }

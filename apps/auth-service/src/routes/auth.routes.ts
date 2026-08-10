@@ -9,7 +9,9 @@ import {
   verifyEmail,
   resendVerificationOtp,
   updateProfile,
-  uploadAvatarController
+  uploadAvatarController,
+  forgotPassword,
+  resetPassword
 } from "../controller/auth.controller.js";
 
 import {
@@ -17,7 +19,9 @@ import {
   loginSchema,
   verifyEmailSchema,
   resendVerificationSchema,
-  updateProfileSchema
+  updateProfileSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema
 } from "../validator/auth.validator.js";
 
 import { validate } from "../middleware/validate.middleware.js";
@@ -44,5 +48,9 @@ router.get("/me", authenticate, me);
 router.patch("/update-profile", authenticate, validate(updateProfileSchema), updateProfile);
 
 router.post("/avatar", authenticate, uploadAvatar.single("avatar"), uploadAvatarController);
+
+router.post("/forgot-password", validate(forgotPasswordSchema), forgotPassword);
+
+router.post("/reset-password", validate(resetPasswordSchema), resetPassword);
 
 export default router;
