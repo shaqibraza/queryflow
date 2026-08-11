@@ -14,6 +14,6 @@ await db.connect();
 
 const app = createApp();
 
-app.listen(env.CONNECTION_SERVICE_PORT, () => {
-  console.log(`connection-service listening on port ${env.CONNECTION_SERVICE_PORT}`);
+app.listen(env.PORT, () => {
+  console.log(`connection-service listening on port ${env.PORT}`);
 });

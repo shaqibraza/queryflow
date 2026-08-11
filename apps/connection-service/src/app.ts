@@ -2,6 +2,9 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import cors from "cors";
 
+import "dotenv/config";
+import { env } from "./config/env.js";
+
 import { HealthController } from "./controllers/health.controller.js";
 import { ConnectionController } from "./controllers/connection.controller.js";
 
@@ -37,7 +40,7 @@ export const createApp = (): express.Express => {
   // cors
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: env.FRONTEND_URL,
       credentials: true
     })
   );

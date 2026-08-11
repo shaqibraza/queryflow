@@ -3,7 +3,10 @@ import { z } from "zod";
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  CONNECTION_SERVICE_PORT: z.coerce.number().int().positive().default(4002)
+
+  PORT: z.coerce.number().int().positive().default(4002),
+
+  FRONTEND_URL: z.string().url().default("http://localhost:3000")
 });
 
 export const env = envSchema.parse(process.env);
