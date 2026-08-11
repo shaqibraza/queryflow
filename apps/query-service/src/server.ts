@@ -3,6 +3,6 @@ import { createApp } from "./app.js";
 
 const app = createApp();
 
-app.listen(env.QUERY_SERVICE_PORT, () => {
-  console.log(`query-service listening on port ${env.QUERY_SERVICE_PORT}`);
+app.listen(env.PORT, () => {
+  console.log(`query-service listening on port ${env.PORT}`);
 });

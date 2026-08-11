@@ -9,6 +9,7 @@ import { swaggerSpec } from "./utils/swagger.js";
 import cors from "cors";
 import metadataRoutes from "./routes/metadata.routes.js";
 import queryRoutes from "./routes/query.routes.js";
+import { env } from "./config/env.js";
 
 export const createApp = (): express.Express => {
   const app = express();
@@ -17,7 +18,7 @@ export const createApp = (): express.Express => {
 
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: env.FRONTEND_URL,
       credentials: true
     })
   );
