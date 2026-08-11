@@ -8,8 +8,8 @@ dotenv.config({
 
 const { createApp } = await import("./app.js");
 const app = createApp();
-const port = process.env.AUTH_SERVICE_PORT || 4001;
+const port = process.env.PORT || process.env.AUTH_SERVICE_PORT || 4001;
 
 app.listen(port, () => {
-  console.log(`Auth Service running on http://localhost:${port}`);
+  console.log(`Auth Service running on ${port}`);
 });

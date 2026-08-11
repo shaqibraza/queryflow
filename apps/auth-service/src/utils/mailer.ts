@@ -47,13 +47,7 @@ export async function sendVerificationEmail(email: string, otp: string): Promise
         </div>
       `
     });
-
-    console.log(`Verification email sent successfully to ${email}`);
   } catch (error) {
-    console.error("========== NODEMAILER ERROR ==========");
-    console.error(error);
-    console.error("======================================");
-
     throw error;
   }
 }
@@ -127,13 +121,7 @@ If you didn't request a password reset, you can safely ignore this email.
         </div>
       `
     });
-
-    console.log(`Password reset email sent successfully to ${email}`);
   } catch (error) {
-    console.error("========== NODEMAILER PASSWORD RESET ERROR ==========");
-    console.error(error);
-    console.error("=====================================================");
-
     throw error;
   }
 }

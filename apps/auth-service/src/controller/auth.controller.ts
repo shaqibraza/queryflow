@@ -706,11 +706,6 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
     await sendPasswordResetEmail(user.email, token);
 
-    console.log("Password reset token generated:", {
-      userId: user.id,
-      token
-    });
-
     return res.status(200).json({
       success: true,
       message: "If an account exists with this email, a password reset link has been sent."

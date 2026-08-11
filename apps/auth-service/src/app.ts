@@ -8,9 +8,11 @@ import { errorMiddleware } from "./middleware/error.middleware.js";
 export const createApp = (): express.Express => {
   const app = express();
 
+  const frontendUrl = process.env.FRONTENED_URL;
+
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: frontendUrl,
       credentials: true
     })
   );
