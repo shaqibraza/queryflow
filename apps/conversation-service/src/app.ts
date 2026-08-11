@@ -6,13 +6,21 @@ import { requestLogger } from "./middleware/request-logger.js";
 import { createHealthRouter } from "./routes/health.routes.js";
 import { HealthService } from "./services/health.service.js";
 import { swaggerSpec } from "./utils/swagger.js";
-
+import cors from "cors";
 import conversationRoutes from "./routes/conversation.routes.js";
+import { env } from "./config/env.js";
 
 export const createApp = (): express.Express => {
   const app = express();
   const healthService = new HealthService("conversation-service");
   const healthController = new HealthController(healthService);
+
+  app.use(
+    cors({
+      origin: env.FRONTEND_URL,
+      credentials: true
+    })
+  );
 
   app.use(express.json());
   app.use(requestLogger);
