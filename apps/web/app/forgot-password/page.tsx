@@ -33,8 +33,6 @@ export default function ForgotPasswordPage() {
 
       setSuccess(true);
     } catch (error) {
-      console.error("Forgot password failed:", error);
-
       setError(getAuthErrorMessage(error));
     } finally {
       setLoading(false);

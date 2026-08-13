@@ -24,10 +24,6 @@ export function ProfileForm() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /*
-   * Keep local form values synchronized
-   * with the Zustand user.
-   */
   useEffect(() => {
     if (!user) {
       return;
@@ -68,19 +64,8 @@ export function ProfileForm() {
         lastName: trimmedLastName
       });
 
-      /*
-       * Backend returns:
-       *
-       * {
-       *   user: {...}
-       * }
-       */
       const updatedUser = response.user;
 
-      /*
-       * Update Zustand so the new name is
-       * immediately reflected everywhere.
-       */
       setUser(updatedUser);
 
       setFirstName(updatedUser.firstName);
@@ -88,8 +73,6 @@ export function ProfileForm() {
 
       setSuccessMessage("Profile updated successfully.");
     } catch (error) {
-      console.error("Profile update failed:", error);
-
       setErrorMessage(getAuthErrorMessage(error));
     } finally {
       setLoading(false);
@@ -129,16 +112,10 @@ export function ProfileForm() {
 
       setSuccessMessage("Avatar updated successfully.");
     } catch (error) {
-      console.error("Avatar upload failed:", error);
-
       setErrorMessage(getAuthErrorMessage(error));
     } finally {
       setLoading(false);
 
-      /*
-       * Allows selecting the same file again
-       * after an upload/error.
-       */
       event.target.value = "";
     }
   }

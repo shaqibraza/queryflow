@@ -355,16 +355,6 @@ export class ConnectionService {
     try {
       return await connector.executeQuery(query as never);
     } catch (error: any) {
-      console.error("DATABASE ERROR:", error.message);
-
-      if (error.code) {
-        console.error("CODE:", error.code);
-      }
-
-      if (error.detail) {
-        console.error("DETAIL:", error.detail);
-      }
-
       throw error;
     } finally {
       await connector.disconnect();

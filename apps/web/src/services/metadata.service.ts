@@ -47,13 +47,7 @@ export interface DatabaseMetadata {
 
 export class MetadataService {
   static async getMetadata(connectionId: string) {
-    console.log("BASE URL:", queryApi.defaults.baseURL);
-
     const url = `/metadata/${connectionId}`;
-
-    console.log("URL:", url);
-
-    console.log("FINAL URL:", `${queryApi.defaults.baseURL}${url}`);
 
     const { data } = await queryApi.get(url);
 

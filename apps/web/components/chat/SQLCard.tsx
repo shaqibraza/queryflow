@@ -30,9 +30,7 @@ export function SQLCard({
       await navigator.clipboard.writeText(sql);
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
-    } catch {
-      // clipboard unavailable — silently ignore in this mock UI
-    }
+    } catch {}
   }
 
   return (

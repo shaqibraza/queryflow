@@ -14,9 +14,3 @@ const queries = [
   "DROP TABLE users;",
   "START TRANSACTION;"
 ];
-
-for (const query of queries) {
-  console.log(query);
-  console.log(analyzer.analyze(query));
-  console.log("--------------------------------");
-}

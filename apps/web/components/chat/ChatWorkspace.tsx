@@ -56,24 +56,9 @@ export function ChatWorkspace({
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    console.group("Messages State");
-
-    console.table(
-      messages.map((message, index) => ({
-        index,
-        id: message.id,
-        role: message.role,
-        content: message.content
-      }))
-    );
-
     const ids = messages.map((message) => message.id);
 
     const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
-
-    if (duplicates.length > 0) {
-      console.error("Duplicate IDs Found:", duplicates);
-    }
 
     console.groupEnd();
   }, [messages]);
@@ -117,8 +102,6 @@ export function ChatWorkspace({
 
       setMessages((previous) => [...previous, assistantMessage]);
     } catch (error) {
-      console.error("Failed to process query:", error);
-
       setMessages((previous) => [
         ...previous,
         {
@@ -154,8 +137,8 @@ export function ChatWorkspace({
             : current
         )
       );
-    } catch (error) {
-      console.error("Execution Failed:", error);
+    } catch (error: any) {
+      throw new Error(error);
     }
   }
 
@@ -198,8 +181,6 @@ export function ChatWorkspace({
 
         setMessages(loadedMessages);
       } catch (error) {
-        console.error("Failed to load conversation messages:", error);
-
         setMessages([]);
       }
     };

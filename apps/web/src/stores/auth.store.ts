@@ -64,10 +64,6 @@ export const useAuthStore = create<AuthState>()(
 
       onRehydrateStorage: () => {
         return (state, error) => {
-          if (error) {
-            console.error("Auth hydration failed:", error);
-          }
-
           state?.setHasHydrated(true);
         };
       }

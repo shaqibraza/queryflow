@@ -11,5 +11,3 @@ const executor = ExecutorFactory.createExecutor(
   "connection-id",
   "user-id"
 );
-
-console.log(executor.constructor.name);

@@ -36,21 +36,10 @@ export default function HomePage() {
     let cancelled = false;
 
     const restoreSession = async () => {
-      /*
-       * No persisted user means there is
-       * nothing to restore.
-       *
-       * The home page is public, so we simply
-       * keep showing the landing page.
-       */
       if (!user) {
         return;
       }
 
-      /*
-       * If we already have an access token,
-       * first verify it with /me.
-       */
       if (accessToken) {
         try {
           const currentUser = await AuthService.me();
@@ -61,25 +50,12 @@ export default function HomePage() {
 
           setUser(currentUser);
 
-          /*
-           * IMPORTANT:
-           *
-           * Do NOT redirect to dashboard here.
-           *
-           * User intentionally opened the home page.
-           */
           return;
-        } catch (error) {
-          console.log("Access token expired. Trying refresh...");
+        } catch (error: any) {
+          throw new Error(error);
         }
       }
 
-      /*
-       * Access token missing/expired.
-       *
-       * Try restoring it using the HttpOnly
-       * refresh-token cookie.
-       */
       try {
         const response = await AuthService.refresh();
 
@@ -95,9 +71,6 @@ export default function HomePage() {
 
         setAccessToken(newAccessToken);
 
-        /*
-         * Verify the newly restored token.
-         */
         const currentUser = await AuthService.me();
 
         if (cancelled) {
@@ -105,26 +78,11 @@ export default function HomePage() {
         }
 
         setUser(currentUser);
-
-        /*
-         * IMPORTANT:
-         *
-         * Still stay on HOME.
-         */
       } catch (error) {
         if (cancelled) {
           return;
         }
 
-        console.log("Session restoration failed:", error);
-
-        /*
-         * Home page is public.
-         *
-         * If session restoration fails,
-         * simply clear stale auth state and
-         * continue showing the home page.
-         */
         logout();
       }
     };

@@ -59,8 +59,6 @@ function ResetPasswordContent() {
         router.replace("/login");
       }, 1500);
     } catch (error) {
-      console.error("Password reset failed:", error);
-
       setError(getAuthErrorMessage(error));
     } finally {
       setLoading(false);

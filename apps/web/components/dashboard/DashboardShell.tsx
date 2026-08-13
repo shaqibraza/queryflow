@@ -79,9 +79,7 @@ export function DashboardShell() {
 
   const setMetadataLoading = useMetadataStore((state) => state.setLoading);
 
-  /*
-   * Load metadata for selected connection.
-   */
+  // Load metadata for selected connection.
   async function loadMetadata(connectionId: string) {
     const cached = getCachedMetadata(connectionId);
 
@@ -104,19 +102,11 @@ export function DashboardShell() {
     }
   }
 
-  /*
-   * Load all database connections and restore
-   * the previously selected connection.
-   */
   async function loadConnections() {
-    console.log("🔥 loadConnections CALLED");
-
     try {
       setLoadingConnections(true);
 
       const list = await ConnectionService.getConnections();
-
-      console.log("Connections restored:", list);
 
       setConnections(list);
 
@@ -143,8 +133,6 @@ export function DashboardShell() {
       // If it no longer exists, use the first connection.
       const connectionToSelect = savedConnection ?? list[0];
 
-      console.log("Connection selected:", connectionToSelect);
-
       // Safety check
       if (!connectionToSelect) {
         setSelectedConnection(null);
@@ -157,13 +145,9 @@ export function DashboardShell() {
       // Persist selected connection
       window.localStorage.setItem(SELECTED_CONNECTION_KEY, connectionToSelect.id);
 
-      console.log("Selected connection persisted:", connectionToSelect.id);
-
       // Restore metadata
       await loadMetadata(connectionToSelect.id);
     } catch (error) {
-      console.error("Failed to load connections:", error);
-
       setConnections([]);
       setSelectedConnection(null);
     } finally {
@@ -183,19 +167,9 @@ export function DashboardShell() {
 
     const restoreSession = async () => {
       try {
-        console.log("===== RESTORING AUTH SESSION =====");
-
         const currentAccessToken = useAuthStore.getState().accessToken;
 
-        /*
-         * After a full browser refresh the access token is
-         * intentionally gone from Zustand memory.
-         *
-         * Restore it using the HttpOnly refresh-token cookie.
-         */
         if (!currentAccessToken) {
-          console.log("No access token in memory → refreshing session");
-
           const refreshResponse = await AuthService.refresh();
 
           if (!refreshResponse?.accessToken) {
@@ -203,14 +177,8 @@ export function DashboardShell() {
           }
 
           setAccessToken(refreshResponse.accessToken);
-
-          console.log("Access token restored successfully");
         }
 
-        /*
-         * Now that we have a valid access token,
-         * restore the authenticated user.
-         */
         const user = await AuthService.me();
 
         if (cancelled) {
@@ -219,20 +187,11 @@ export function DashboardShell() {
 
         setUser(user);
 
-        console.log("Authenticated user restored:", user);
-
-        /*
-         * Now restore database connections.
-         */
         await loadConnections();
-
-        console.log("Connections restored successfully");
       } catch (error) {
         if (cancelled) {
           return;
         }
-
-        console.error("Failed to restore authentication session:", error);
 
         logout();
 
@@ -251,42 +210,18 @@ export function DashboardShell() {
     };
   }, [hasHydrated, logout, router, setAccessToken, setUser]);
 
-  /*
-   * Debug metadata state.
-   */
-  useEffect(() => {
-    console.log("Metadata Store:", metadata);
-  }, [metadata]);
-
-  /*
-   * Called when QueryService creates a
-   * new conversation.
-   */
   function handleConversationCreated(conversationId: string) {
     setActiveConversationId(conversationId);
 
     setConversationRefreshKey((previous) => previous + 1);
   }
 
-  /*
-   * New Chat:
-   * - clear current conversation
-   * - remount ChatWorkspace
-   * - keep selected database
-   */
   function handleNewChat() {
     setActiveConversationId(undefined);
 
     setChatResetKey((previous) => previous + 1);
   }
 
-  /*
-   * Database selection:
-   * - persist selected DB
-   * - clear current conversation
-   * - reset chat
-   * - load new DB metadata
-   */
   async function handleConnectionSelect(connection: DatabaseConnection) {
     setSelectedConnection(connection);
 

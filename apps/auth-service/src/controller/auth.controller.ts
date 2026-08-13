@@ -62,8 +62,6 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     try {
       await sendVerificationEmail(user.email, verificationOtp);
     } catch (emailError) {
-      console.error("Failed to send verification email:", emailError);
-
       // Remove the newly created user if email failed
       await prisma.user.delete({
         where: {
@@ -93,8 +91,6 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       }
     });
   } catch (error) {
-    console.error("Registration error:", error);
-
     next(error);
   }
 };
@@ -177,8 +173,6 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
       message: "Email verified successfully"
     });
   } catch (error) {
-    console.error("Email verification error:", error);
-
     next(error);
   }
 };
@@ -241,7 +235,6 @@ export const resendVerificationOtp = async (req: Request, res: Response, next: N
     }
     return res.status(200).json(genericResponse);
   } catch (error) {
-    console.error("Resend verification OTP error:", error);
     next(error);
   }
 };
@@ -664,7 +657,6 @@ export const uploadAvatarController = async (req: Request, res: Response, next: 
       data: { user }
     });
   } catch (error) {
-    console.error("Avatar uplaod failed", error);
     next(error);
   }
 };

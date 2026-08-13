@@ -63,8 +63,6 @@ export function Sidebar({
         }
       } catch (error) {
         if (!cancelled) {
-          console.error("Failed to load conversations:", error);
-
           setConversations([]);
         }
       } finally {
@@ -84,8 +82,8 @@ export function Sidebar({
   async function handleLogout() {
     try {
       await AuthService.logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
+    } catch (error: any) {
+      throw new Error(error);
     } finally {
       logout();
       router.replace("/login");
@@ -131,8 +129,8 @@ export function Sidebar({
       setEditingConversationId(null);
       setEditingTitle("");
       setOpenMenuId(null);
-    } catch (error) {
-      console.error("Failed to rename conversation:", error);
+    } catch (error: any) {
+      throw new Error(error);
     } finally {
       setActionConversationId(null);
     }
@@ -156,15 +154,11 @@ export function Sidebar({
 
       setOpenMenuId(null);
 
-      /*
-       * If the currently active conversation was deleted,
-       * start a fresh chat.
-       */
       if (conversationId === activeConversationId) {
         onNewChat();
       }
-    } catch (error) {
-      console.error("Failed to delete conversation:", error);
+    } catch (error: any) {
+      throw new Error(error);
     } finally {
       setActionConversationId(null);
     }

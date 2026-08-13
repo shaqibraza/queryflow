@@ -13,9 +13,3 @@ const queries = [
   `DROP TABLE "User";`,
   `BEGIN;`
 ];
-
-for (const query of queries) {
-  console.log(query);
-  console.log(analyzer.analyze(query));
-  console.log("--------------------------------");
-}

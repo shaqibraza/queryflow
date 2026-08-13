@@ -4,11 +4,6 @@ import { useAuthStore } from "../stores/auth.store";
 function attachAuth(config: InternalAxiosRequestConfig) {
   const { accessToken, user } = useAuthStore.getState();
 
-  console.log("====== AUTH REQUEST ======");
-  console.log("URL:", config.url);
-  console.log("Access Token:", accessToken);
-  console.log("User:", user);
-
   if (accessToken) {
     config.headers.set("Authorization", `Bearer ${accessToken}`);
   }
@@ -59,11 +54,8 @@ export const queryApi = axios.create({
     "Content-Type": "application/json"
   }
 });
-console.log("QUERY API BASE =", queryApi.defaults.baseURL);
 
 queryApi.interceptors.request.use(attachAuth);
-
-console.log("QUERY API BASE =", queryApi.defaults.baseURL);
 
 let refreshPromise: Promise<string | null> | null = null;
 
@@ -83,8 +75,6 @@ async function refreshAccessToken(): Promise<string | null> {
         return accessToken;
       })
       .catch((error) => {
-        console.error("Access token refresh failed:", error);
-
         useAuthStore.getState().logout();
 
         return null;

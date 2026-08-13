@@ -48,13 +48,3 @@ const queries: MongoCommand[] = [
     operation: "drop"
   }
 ];
-
-for (const query of queries) {
-  console.log("MongoCommand:");
-  console.log(query);
-
-  console.log("Analysis:");
-  console.log(analyzer.analyze(query));
-
-  console.log("--------------------------------");
-}

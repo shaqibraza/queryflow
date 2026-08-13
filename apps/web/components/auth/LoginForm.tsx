@@ -43,10 +43,8 @@ export function LoginForm() {
         password: data.password,
         rememberMe
       })) as AuthResponse;
-      console.log("LOGIN RESULT", result);
 
       login(result.user, result.accessToken);
-      console.log("STORE AFTER LOGIN", useAuthStore.getState());
       router.push("/dashboard");
     } catch (error) {
       setAuthError(getAuthErrorMessage(error));

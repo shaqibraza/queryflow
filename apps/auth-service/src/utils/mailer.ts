@@ -59,11 +59,6 @@ const sendEmail = async ({
   if (!response.ok) {
     const errorBody = await response.text();
 
-    console.error("Brevo email API failed:", {
-      status: response.status,
-      body: errorBody
-    });
-
     throw new Error(`Brevo email API failed with status ${response.status}`);
   }
 };
