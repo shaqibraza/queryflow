@@ -35,26 +35,12 @@ export function Navbar() {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
-  console.log("========== NAVBAR AUTH ==========");
-  console.log("user:", user);
-  console.log("isAuthenticated:", isAuthenticated);
-  console.log("hasHydrated:", hasHydrated);
-  console.log("=================================");
 
-  useEffect(() => {
-    console.log("========== NAVBAR AUTH STATE ==========");
-    console.log("user:", user);
-    console.log("isAuthenticated:", isAuthenticated);
-    console.log("hasHydrated:", hasHydrated);
-    console.log("=======================================");
-  }, [user, isAuthenticated, hasHydrated]);
   const logout = useAuthStore((state) => state.logout);
 
   const profileRef = useRef<HTMLDivElement>(null);
 
   const isLoggedIn = hasHydrated && (isAuthenticated || !!user);
-
-  console.log("NAVBAR isLoggedIn:", isLoggedIn);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -73,8 +59,8 @@ export function Navbar() {
   async function handleLogout() {
     try {
       await AuthService.logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
+    } catch (error: any) {
+      throw new Error(error);
     } finally {
       logout();
       setProfileOpen(false);
